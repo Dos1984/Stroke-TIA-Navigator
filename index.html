@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>TIA & Stroke Navigator</title>
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiVElBICYgU3Ryb2tlIE5hdmlnYXRvciIsInNob3J0X25hbWUiOiJTdHJva2UgTmF2Iiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImJhY2tncm91bmRfY29sb3IiOiIjMUUyNzYxIiwidGhlbWVfY29sb3IiOiIjMUUyNzYxIn0=">
+<meta name="theme-color" content="#1E2761">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stroke Nav">
+<style>
+:root{
+  --navy:#1E2761; --navy-dark:#141B4D; --ice:#CADCFC; --ink:#222831; --muted:#5B6478;
+  --tia:#B9720A; --tia-dark:#8F5807;
+  --isch:#0B7285; --isch-dark:#075A69;
+  --haem:#C0392B; --haem-dark:#932B20;
+  --assess:#3B4C8C; --assess-dark:#2A3766;
+  --train:#6B4FA0; --train-dark:#523B7D;
+  --ok:#1E8449; --warn:#C0392B; --amber:#B9720A;
+  --card:#F7F8FC; --line:#E3E6EE;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:#EDEFF5;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Calibri,Arial,sans-serif;color:var(--ink);line-height:1.4;}
+.wrap{max-width:640px;margin:0 auto;background:#fff;min-height:100vh;padding-bottom:82px;}
+h1,h2,h3{font-family:Cambria,Georgia,serif;margin:0;}
+button{font-family:inherit;cursor:pointer;}
+
+/* ---------- Menu ---------- */
+#menu{padding:34px 20px 20px;}
+.menu-header{background:var(--navy);color:#fff;margin:-34px -20px 22px;padding:34px 20px 26px;}
+.menu-kicker{font-size:12px;letter-spacing:2px;font-weight:700;color:var(--ice);margin-bottom:10px;}
+.menu-title{font-size:24px;color:#fff;line-height:1.3;}
+.menu-sub{font-size:13.5px;color:var(--ice);margin-top:10px;font-style:italic;}
+.menu-grid{display:flex;flex-direction:column;gap:14px;}
+.menu-card{border:none;border-radius:14px;padding:20px;text-align:left;color:#fff;display:flex;align-items:center;gap:16px;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+.menu-num{font-size:30px;font-weight:700;font-family:Cambria,serif;opacity:.85;flex:0 0 auto;width:40px;}
+.menu-card-title{font-size:18px;font-weight:700;font-family:Cambria,serif;}
+.menu-card-sub{font-size:12.5px;opacity:.9;margin-top:3px;}
+.menu-note{font-size:12.5px;color:var(--muted);margin-top:20px;padding:12px 14px;background:var(--card);border-radius:10px;}
+.install-box{margin-top:16px;padding:14px 16px;background:#EAF1FF;border:1.5px solid #C4D6F5;border-radius:12px;}
+.install-title{font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.install-steps{font-size:12.5px;color:var(--ink);margin:0;padding-left:18px;}
+.install-steps li{margin-bottom:4px;}
+
+/* ---------- Screen shell ---------- */
+.screen{display:none;}
+.screen.active{display:block;}
+.topbar{position:sticky;top:0;z-index:5;color:#fff;padding:14px 12px 12px;display:flex;align-items:center;gap:6px;}
+.backbtn{background:rgba(255,255,255,0.18);border:none;color:#fff;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;flex:0 0 auto;}
+.topbar-title{font-size:15px;font-weight:700;font-family:Cambria,serif;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.refbtn{background:rgba(255,255,255,0.18);border:none;color:#fff;border-radius:8px;padding:8px 9px;font-size:11.5px;font-weight:700;flex:0 0 auto;white-space:nowrap;}
+.resetbtn{background:rgba(0,0,0,0.22);border:none;color:#fff;border-radius:8px;padding:8px 9px;font-size:11.5px;font-weight:700;transition:background .15s;flex:0 0 auto;white-space:nowrap;}
+.resetbtn.confirming{background:#fff;color:var(--warn);}
+
+.stopwatch{display:flex;align-items:center;gap:10px;padding:10px 16px;color:#fff;}
+.stopwatch .time{font-family:"Courier New",monospace;font-size:26px;font-weight:700;letter-spacing:1px;}
+.stopwatch button{background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;}
+
+.section{padding:18px 16px 6px;}
+.section-title{font-size:14px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+
+.check-row{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:10px;background:var(--card);margin-bottom:8px;border:1.5px solid transparent;}
+.check-row input{width:22px;height:22px;flex:0 0 auto;margin-top:1px;accent-color:var(--navy);}
+.check-row span{font-size:14.5px;}
+.check-row.done{background:#EAF4EE;border-color:var(--ok);}
+.check-row.done span{color:#3a5a46;text-decoration:line-through;text-decoration-color:#9bbfa9;}
+
+.counter-block{background:var(--card);border-radius:12px;padding:14px;margin-bottom:10px;}
+.counter-top{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.counter-label{font-size:14.5px;font-weight:700;color:var(--navy);}
+.counter-display{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap;}
+.counter-btn{width:100%;margin-top:10px;border:none;border-radius:9px;padding:12px;color:#fff;font-size:14.5px;font-weight:700;}
+.counter-btn:disabled{opacity:.5;}
+
+.due-banner{margin-top:8px;padding:9px 10px;border-radius:8px;font-size:12.5px;font-weight:700;display:none;}
+.due-banner.show{display:block;}
+.due-banner.stage-counting{background:#EEF1F8;color:var(--muted);}
+.due-banner.stage-warn{background:#FCEFD6;color:var(--amber);}
+.due-banner.stage-alarm{background:#FBEAE8;color:var(--warn);animation:blinkText 1s infinite;}
+
+.timer-block{background:var(--navy);border-radius:12px;padding:16px;text-align:center;margin-bottom:12px;transition:background .2s;}
+.timer-display{font-family:"Courier New",monospace;font-size:36px;font-weight:700;color:#fff;letter-spacing:1px;}
+.timer-caption{font-size:12px;color:var(--ice);margin-top:2px;text-transform:uppercase;letter-spacing:1px;}
+.timer-block button{margin-top:10px;border:none;border-radius:9px;padding:11px 18px;font-size:14px;font-weight:700;color:#fff;background:rgba(255,255,255,0.18);}
+.timer-block button:disabled{opacity:.5;}
+.timer-block.stage-warn{background:var(--amber);}
+.timer-block.stage-alarm{background:var(--warn);animation:pulseBg 1s infinite;}
+@keyframes pulseBg{0%{opacity:1;}50%{opacity:.7;}100%{opacity:1;}}
+@keyframes blinkText{0%,100%{opacity:1;}50%{opacity:.5;}}
+.cycle-badge{display:inline-block;background:rgba(255,255,255,0.15);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;margin-bottom:8px;}
+
+.pathbtns{display:flex;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.pathbtn{flex:1;min-width:100px;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:12px 8px;font-size:12.5px;font-weight:700;color:var(--ink);}
+.pathbtn.active-a{color:#fff;}
+.pathbtn.active-b{color:#fff;}
+.pathbtn.active-c{color:#fff;}
+
+.status-banner{border-radius:12px;padding:14px;margin:0 16px 12px;font-weight:700;font-size:14.5px;text-align:center;}
+.status-stable{background:#EAF4EE;color:var(--ok);border:1.5px solid var(--ok);}
+.status-unstable{background:#FBEAE8;color:var(--warn);border:1.5px solid var(--warn);}
+.status-pending{background:var(--card);color:var(--muted);border:1.5px solid var(--line);}
+
+.hidden-path{display:none;}
+.hidden-path.show{display:block;}
+.textnote{font-size:12.5px;color:var(--muted);padding:0 4px;margin:2px 0 10px;font-style:italic;}
+.input-card{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;}
+.input-label{display:block;font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.clinical-input,.clinical-select,.clinical-textarea{width:100%;border:1.5px solid #C9CEDA;border-radius:9px;background:#fff;color:var(--ink);font:inherit;font-size:15px;padding:11px 12px;}
+.clinical-textarea{min-height:84px;resize:vertical;}
+.input-error{display:none;color:var(--warn);font-size:12.5px;font-weight:700;margin-top:8px;}
+.input-error.show{display:block;}
+
+.logbox{background:var(--navy-dark);border-radius:12px;padding:12px 14px;max-height:220px;overflow-y:auto;}
+.logbox .logentry{font-size:12.5px;color:var(--ice);font-family:"Courier New",monospace;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.08);}
+.logbox .logempty{font-size:12.5px;color:var(--muted);}
+
+.flag-strip{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.flag-btn{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:8px 14px;font-size:12.5px;font-weight:700;color:var(--ink);}
+.flag-btn.flagged{color:#fff;}
+
+.score-row{display:flex;gap:6px;margin:8px 0 4px;flex-wrap:wrap;}
+.score-btn{flex:1;min-width:38px;border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:9px 4px;font-size:13px;font-weight:700;color:var(--ink);}
+.score-btn.picked{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+.max-warning{background:#FBEAE8;color:var(--warn);border-radius:9px;padding:10px;font-size:13px;font-weight:700;text-align:center;margin-top:8px;display:none;}
+.max-warning.show{display:block;}
+
+/* ---------- Reference hub ---------- */
+.ref-filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.refitem{margin-bottom:20px;}
+.refitem-label{font-weight:700;font-size:14.5px;margin-bottom:6px;}
+.refitem-box{border:1.4px solid;border-radius:10px;padding:12px;background:var(--card);}
+.refitem-tip{font-size:12.5px;color:var(--ink);margin-top:6px;}
+.ref-cat.ref-hidden{display:none;}
+
+.nihss-total-block{background:var(--navy);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px;position:sticky;top:64px;z-index:4;}
+.nihss-total-num{font-family:"Courier New",monospace;font-size:44px;font-weight:700;color:#fff;}
+.nihss-total-label{font-size:12px;color:var(--ice);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.nihss-total-band{font-size:13.5px;font-weight:700;margin-top:6px;padding:5px 10px;border-radius:20px;display:inline-block;}
+
+.nihss-item{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+.nihss-item-title{font-size:13.5px;font-weight:700;color:var(--navy);}
+.nihss-item-desc{font-size:11.5px;color:var(--muted);margin-top:3px;}
+.nihss-item-scale{font-size:11px;color:var(--ink);margin-top:6px;}
+.nihss-item-scale div{padding:1px 0;}
+.nihss-sync-result{display:none;margin:-4px 0 10px 2px;padding:8px 11px;border-radius:8px;background:#E6F3F2;color:var(--isch-dark);font-size:12.5px;font-weight:700;}
+.nihss-sync-result.show{display:block;}
+
+.bamford-result{border-radius:12px;padding:16px;margin:10px 0 14px;text-align:center;}
+.bamford-result-code{font-family:Cambria,serif;font-size:30px;font-weight:700;color:#fff;}
+.bamford-result-name{font-size:13px;color:#fff;margin-top:2px;}
+
+.summary-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px;}
+.summary-table th,.summary-table td{border:1px solid var(--line);padding:6px 5px;text-align:left;vertical-align:top;}
+.summary-table th{background:var(--navy);color:#fff;font-size:11px;}
+
+/* ---------- Bottom Navigation ---------- */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;max-width:640px;margin:0 auto;background:#fff;border-top:1.5px solid var(--line);display:flex;z-index:30;box-shadow:0 -2px 10px rgba(0,0,0,0.08);}
+.bottomnav button{flex:1;background:none;border:none;padding:9px 2px 8px;font-size:10.2px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;}
+.bottomnav button .nav-icon{font-size:19px;line-height:1;}
+.bottomnav button.active{color:var(--navy);}
+.bottomnav button.active .nav-icon{transform:scale(1.08);}
+
+/* ---------- Training Scenarios ---------- */
+.scenario-card{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:12px;background:var(--card);margin-bottom:10px;border-left:5px solid var(--line);text-align:left;width:100%;}
+.scenario-num{font-family:Cambria,serif;font-size:20px;font-weight:700;color:var(--train);flex:0 0 auto;width:26px;}
+.scenario-tag{display:inline-block;font-size:11px;font-weight:700;padding:5px 12px;border-radius:12px;color:#fff;margin:2px 0 10px;text-transform:uppercase;letter-spacing:0.4px;}
+.scenario-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:3px;}
+.scenario-teaser{font-size:12px;color:var(--muted);}
+.scenario-meta{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.scenario-block-title{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.4px;margin:16px 0 8px;}
+.scenario-answer{display:none;}
+.scenario-answer.show{display:block;}
+.scenario-result{margin-top:6px;}
+.result-pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;}
+.result-correct{background:#EAF4EE;color:var(--ok);}
+.result-incorrect{background:#FCEFD6;color:var(--amber);}
+
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;}
+.diff-btn{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:13px 8px;font-size:12.5px;font-weight:700;color:var(--ink);}
+.diff-btn:disabled{opacity:0.65;}
+.diff-btn.correct{background:var(--ok);border-color:var(--ok);color:#fff;opacity:1;}
+.diff-btn.incorrect{background:var(--warn);border-color:var(--warn);color:#fff;opacity:1;}
+
+/* ---------- Practice Banner (shown on tool screens while practising a training case) ---------- */
+.practice-banner{background:var(--train);padding:12px 16px 14px;}
+.practice-banner-kicker{font-size:10.5px;font-weight:700;letter-spacing:1.2px;color:#E4DCF5;margin-bottom:4px;}
+.practice-banner-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px;font-family:Cambria,serif;}
+.practice-banner-teaser{font-size:11.5px;color:#E4DCF5;margin-bottom:10px;}
+.practice-banner-toggle{width:100%;background:rgba(255,255,255,0.18);border:none;color:#fff;border-radius:8px;padding:9px 8px;font-size:12px;font-weight:700;margin-bottom:10px;}
+.practice-banner-full{display:none;background:rgba(0,0,0,0.16);border-radius:10px;padding:11px 13px;margin-bottom:10px;}
+.practice-banner-full.show{display:block;}
+.practice-banner-full p{margin:0 0 8px;font-size:12px;color:#F3EEFA;line-height:1.45;}
+.practice-banner-full p:last-child{margin-bottom:0;}
+.practice-banner-full .pb-label{font-weight:700;color:#fff;text-transform:uppercase;font-size:10px;letter-spacing:0.6px;margin:10px 0 5px;}
+.practice-banner-full .pb-label:first-child{margin-top:0;}
+.practice-banner-actions{display:flex;gap:8px;}
+.practice-banner-actions button{flex:1;background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:9px 8px;font-size:12px;font-weight:700;}
+.practice-banner-actions button.end-btn{background:rgba(0,0,0,0.18);flex:0 0 auto;padding:9px 14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ================= MENU ================= -->
+<div id="menu">
+  <div class="menu-header">
+    <div class="menu-kicker">TIA &amp; STROKE NAVIGATOR</div>
+    <div class="menu-title">Real-Time Checklists for TIA, Ischaemic &amp; Haemorrhagic Stroke</div>
+    <div class="menu-sub">Tap an emergency to open its live, step-by-step navigator.</div>
+  </div>
+  <div class="menu-grid">
+    <button class="menu-card" style="background:var(--assess)" onclick="showScreen('assess')">
+      <div class="menu-num">1</div>
+      <div><div class="menu-card-title">Rapid Assessment</div><div class="menu-card-sub">ABCDE &middot; FAST/BE-FAST &middot; glucose &middot; ROSIER &middot; onset-time trigger</div></div>
+    </button>
+    <button class="menu-card" style="background:var(--tia)" onclick="showScreen('tia')">
+      <div class="menu-num">2</div>
+      <div><div class="menu-card-title">TIA Pathway</div><div class="menu-card-sub">Red flags &middot; aspirin &middot; urgent referral &lt;24h &middot; prevention</div></div>
+    </button>
+    <button class="menu-card" style="background:var(--isch)" onclick="showScreen('isch')">
+      <div class="menu-num">3</div>
+      <div><div class="menu-card-title">Ischaemic Stroke</div><div class="menu-card-sub">Thrombolysis/thrombectomy windows &middot; eligibility &middot; monitoring</div></div>
+    </button>
+    <button class="menu-card" style="background:var(--haem)" onclick="showScreen('haem')">
+      <div class="menu-num">4</div>
+      <div><div class="menu-card-title">Haemorrhagic Stroke</div><div class="menu-card-sub">BP bundle &middot; anticoagulation reversal &middot; neurosurgery referral</div></div>
+    </button>
+  </div>
+
+  <button class="menu-card ref-hub-card" style="background:var(--navy);margin-top:14px;" onclick="openRefHub('menu')">
+    <div class="menu-num">&#128202;</div>
+    <div><div class="menu-card-title">Reference Tools</div><div class="menu-card-sub">NIHSS calculator &middot; stroke mimics &middot; Bamford/Oxford classifier</div></div>
+  </button>
+
+  <button class="menu-card" style="background:var(--train);margin-top:14px;" onclick="showScreen('scenarios')">
+    <div class="menu-num">&#127891;</div>
+    <div><div class="menu-card-title">Training Scenarios</div><div class="menu-card-sub">10 practice cases — TIAs, strokes &amp; mimics — work through them using this app</div></div>
+  </button>
+
+  <div class="install-box">
+    <div class="install-title">&#128241; Add this to your phone as an app</div>
+    <ol class="install-steps">
+      <li><strong>iPhone:</strong> open this page in Safari &rarr; tap the Share icon &rarr; <strong>Add to Home Screen</strong>.</li>
+      <li><strong>Android:</strong> open this page in Chrome &rarr; tap the &#8942; menu &rarr; <strong>Add to Home Screen</strong> (or <strong>Install app</strong>).</li>
+    </ol>
+    <div class="install-title" style="margin-top:8px;">It then opens full-screen from your home screen icon and works offline &mdash; everything is built into this one file.</div>
+  </div>
+
+  <div class="menu-note">Built for real-time bedside use in Irish &amp; UK emergency departments and stroke units. Every checkbox and button timestamps an entry in that tool's assessment log. Aligned to NICE NG128 (2025 amendments), the UK &amp; Ireland National Clinical Guideline for Stroke (2023), the HSE National Clinical Programme for Stroke, and the AHA/ASA 2022 ICH Guideline. If cardiac or respiratory arrest occurs at any point, switch immediately to your ACLS Navigator. This aid supports &mdash; it does not replace &mdash; clinical judgment, senior review and your institution's local protocols.</div>
+</div>
+
+<!-- ================= 1. RAPID ASSESSMENT ================= -->
+<div class="screen" id="screen-assess">
+  <div class="topbar" style="background:var(--assess)">
+    <button class="backbtn" onclick="showMenu()">&larr; Menu</button>
+    <div class="topbar-title">Rapid Assessment</div>
+    <button class="refbtn" onclick="openRefHub('assess')">&#128202; Ref</button>
+    <button class="resetbtn" id="resetbtn-assess" onclick="handleResetTap('assess')">Reset</button>
+  </div>
+  <div class="stopwatch" style="background:var(--assess-dark)">
+    <span class="time" id="assess-elapsed">00:00</span>
+    <button onclick="toggleStopwatch('assess')" id="assess-sw-btn">Start</button>
+  </div>
+  <div id="practice-banner-assess"></div>
+
+  <div class="section">
+    <div class="section-title">Safety First — ABCDE</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Airway assessed/protected"><span>Airway: protect if GCS falling; recovery position if vomiting &amp; not a thrombolysis candidate</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Breathing assessed, O2 given if SpO2 <95%"><span>Breathing: O&#8322; only if SpO&#8322; &lt;95%; check rate &amp; pattern</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Circulation: HR/BP, IV access, ECG for AF"><span>Circulation: HR, BP, IV access, 12-lead ECG for AF</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Disability: capillary glucose, GCS, pupils checked"><span>Disability: capillary glucose, GCS/AVPU, pupils</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Exposure: temperature, trauma check, last known well time noted"><span>Exposure: temperature, trauma check, note last known well time</span></label>
+    <div class="textnote">If the patient loses airway reflexes or arrests at any point, stop here and switch to BLS/your ACLS Navigator.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Glucose Check — Do This Before Anything Else</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Capillary glucose checked and normal (excludes hypoglycaemia mimic)"><span>Capillary glucose checked and normal</span></label>
+    <button class="counter-btn" style="background:var(--warn)" onclick="flagHypo()">&#9888; Flag Hypoglycaemia Found</button>
+    <div class="due-banner" id="hypo-banner"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Onset / Last Known Well — Window Tracker</div>
+    <div class="textnote" style="margin:0 0 8px;">Enter the best-known clinical reference time. The app calculates elapsed time from the device clock and continues updating from that point.</div>
+    <div class="input-card">
+      <label class="input-label" for="onset-type">Reference time</label>
+      <select class="clinical-select" id="onset-type">
+        <option value="onset">Symptoms came on</option>
+        <option value="lkw">Last seen well</option>
+      </select>
+      <label class="input-label" for="onset-datetime" style="margin-top:10px;">Date and time</label>
+      <input class="clinical-input" id="onset-datetime" type="datetime-local">
+      <div class="input-error" id="onset-error"></div>
+      <button class="counter-btn" style="background:var(--isch)" onclick="setOnsetReference()" id="onset-btn">Calculate Time Difference</button>
+    </div>
+    <div class="timer-block" id="onset-timer-block" style="display:none;">
+      <div class="cycle-badge" id="onset-badge">Time since onset</div>
+      <div class="timer-display" id="onset-timer-display">00:00:00</div>
+      <div class="timer-caption" id="onset-timer-caption">Standard window closes at 4:30:00</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">FAST / BE-FAST Screen</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Face: facial droop assessed"><span>Face — has the face fallen on one side? Can they smile?</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Arms: arm drift assessed"><span>Arms — can they raise both arms and keep them there?</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Speech: slurred/garbled speech assessed"><span>Speech — slurred or garbled? Can they understand you?</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Balance: sudden loss of balance/coordination assessed"><span>Balance — sudden loss of balance or coordination?</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Eyes: sudden vision loss/double vision assessed"><span>Eyes — sudden vision loss or double vision?</span></label>
+    <div class="textnote">Balance + Eyes catch posterior-circulation strokes that classic FAST alone can miss.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ROSIER Score (score &gt;0 suggests stroke likely)</div>
+    <div class="textnote" style="margin:0 0 8px;">Only apply after excluding hypoglycaemia. Tap all that apply — running score updates live.</div>
+    <div class="counter-block">
+      <div class="counter-top"><div class="counter-label">ROSIER Total</div><div class="counter-display" id="rosier-total">0</div></div>
+    </div>
+    <label class="check-row"><input type="checkbox" class="rosier-check" data-pts="-1" data-log="ROSIER: loss of consciousness/syncope (-1)"><span>Loss of consciousness or syncope <b>(&minus;1)</b></span></label>
+    <label class="check-row"><input type="checkbox" class="rosier-check" data-pts="-1" data-log="ROSIER: seizure activity (-1)"><span>Seizure activity <b>(&minus;1)</b></span></label>
+    <label class="check-row"><input type="checkbox" class="rosier-check" data-pts="1" data-log="ROSIER: new asymmetric facial weakness (+1)"><span>New asymmetric facial weakness <b>(+1)</b></span></label>
+    <label class="check-row"><input type="checkbox" class="rosier-check" data-pts="1" data-log="ROSIER: new asymmetric arm weakness (+1)"><span>New asymmetric arm weakness <b>(+1)</b></span></label>
+    <label class="check-row"><input type="checkbox" class="rosier-check" data-pts="1" data-log="ROSIER: new asymmetric leg weakness (+1)"><span>New asymmetric leg weakness <b>(+1)</b></span></label>
+    <label class="check-row"><input type="checkbox" class="rosier-check" data-pts="1" data-log="ROSIER: new speech disturbance (+1)"><span>New speech disturbance <b>(+1)</b></span></label>
+    <label class="check-row"><input type="checkbox" class="rosier-check" data-pts="1" data-log="ROSIER: new visual field defect (+1)"><span>New visual field defect <b>(+1)</b></span></label>
+    <div class="textnote">A score of 0 or below does <b>not</b> exclude stroke/TIA — correlate clinically and never let ROSIER delay imaging.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Screen For Mimics Before Committing</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Witnessed seizure or possible Todd's paresis considered"><span>Witnessed seizure / possible Todd's paresis?</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Migraine with aura / hemiplegic migraine history considered"><span>History of migraine with aura?</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Sepsis or metabolic derangement (e.g. hyponatraemia) considered"><span>Sepsis / metabolic derangement (e.g. hyponatraemia)?</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Syncope with rapid full recovery considered"><span>Syncope with rapid, full recovery?</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Inconsistent exam findings (functional) considered"><span>Inconsistent exam findings (functional)?</span></label>
+    <button class="counter-btn" style="background:var(--navy)" onclick="openRefHubFilter('assess','mimics')">Open Full Mimics Comparison &rarr;</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">NIHSS Score</div>
+    <button class="counter-btn" style="background:var(--navy);margin-top:0" onclick="openRefHubFilter('assess','nihss')">Open NIHSS Calculator &rarr;</button>
+    <div class="nihss-sync-result" id="nihss-result-assess"></div>
+    <label class="check-row"><input type="checkbox" class="logcheck" id="nihss-doc-assess" data-tool="assess" data-log="NIHSS documented"><span>NIHSS documented</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Imaging &amp; Bloods</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Immediate non-contrast CT brain requested"><span>Immediate non-contrast CT brain requested</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="CT angiography requested (if LVO/thrombectomy suspected)"><span>CT angiography requested if LVO/thrombectomy suspected</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Bloods sent: FBC, U&E, coagulation screen, glucose"><span>Bloods sent: FBC, U&amp;E, coagulation screen, glucose</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="assess" data-log="Medication history taken: anticoagulants/antiplatelets, last dose time"><span>Medication history: anticoagulants/antiplatelets &amp; last dose time</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">CT Result — Route To The Right Pathway</div>
+    <div class="pathbtns">
+      <button class="pathbtn" style="background:var(--isch);color:#fff" onclick="selectCtResult(this,'isch','No haemorrhage on CT \u2014 routed to Ischaemic Stroke pathway')">No Haemorrhage<br>&rarr; Ischaemic</button>
+      <button class="pathbtn" style="background:var(--haem);color:#fff" onclick="selectCtResult(this,'haem','Haemorrhage confirmed on CT \u2014 routed to Haemorrhagic Stroke pathway')">Haemorrhage Seen<br>&rarr; Haemorrhagic</button>
+      <button class="pathbtn" style="background:var(--tia);color:#fff" onclick="selectCtResult(this,'tia','Symptoms resolved, normal imaging \u2014 routed to TIA pathway')">Resolved / Normal<br>&rarr; TIA</button>
+    </div>
+    <div class="input-card" id="cta-followup" style="margin-top:12px;display:none;">
+      <label class="input-label" for="cta-performed">Was CT angiography performed?</label>
+      <select class="clinical-select" id="cta-performed" onchange="updateCtaPerformed()">
+        <option value="">Select an option</option>
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+      <div id="cta-result-wrap" style="display:none;">
+        <label class="input-label" for="cta-result" style="margin-top:10px;">CTA result</label>
+        <select class="clinical-select" id="cta-result" onchange="updateCtaResult()">
+          <option value="">Select a result</option>
+          <option value="lvo">LVO identified</option>
+          <option value="no-lvo">No LVO identified</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div id="cta-other-wrap" style="display:none;">
+        <label class="input-label" for="cta-other" style="margin-top:10px;">Other CTA finding</label>
+        <textarea class="clinical-textarea" id="cta-other" placeholder="Type or use device dictation. Do not enter names or record numbers." onblur="logCtaOther()"></textarea>
+      </div>
+      <button class="counter-btn" style="background:var(--navy)" id="imaging-continue-btn" onclick="continueAfterImaging()">Continue to Selected Pathway &rarr;</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Assessment Log</div>
+    <div class="logbox" id="assess-log"><div class="logempty">No actions logged yet.</div></div>
+  </div>
+</div>
+
+<!-- ================= 2. TIA PATHWAY ================= -->
+<div class="screen" id="screen-tia">
+  <div class="topbar" style="background:var(--tia)">
+    <button class="backbtn" onclick="showMenu()">&larr; Menu</button>
+    <div class="topbar-title">TIA Pathway</div>
+    <button class="refbtn" onclick="openRefHub('tia')">&#128202; Ref</button>
+    <button class="resetbtn" id="resetbtn-tia" onclick="handleResetTap('tia')">Reset</button>
+  </div>
+  <div class="stopwatch" style="background:var(--tia-dark)">
+    <span class="time" id="tia-elapsed">00:00</span>
+    <button onclick="toggleStopwatch('tia')" id="tia-sw-btn">Start</button>
+  </div>
+  <div id="practice-banner-tia"></div>
+
+  <div class="section">
+    <div class="section-title">Confirm This Is a TIA</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Focal neurological symptoms have fully resolved"><span>Focal neurological symptoms have fully resolved</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Neuro exam now normal"><span>Neurological examination is now normal</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Hypoglycaemia and other mimics excluded"><span>Hypoglycaemia and other mimics excluded</span></label>
+    <div class="textnote">Modern definition: transient focal neurological dysfunction from focal brain/spinal cord/retinal ischaemia, <b>without</b> acute infarction on imaging — the label applies regardless of duration if imaging is clear.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Red Flags — Check Any That Apply</div>
+    <div class="textnote" style="margin:0 0 8px;">The banner below updates automatically as you check these.</div>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="tia" data-log="Flagged: ongoing focal deficit"><span>Ongoing focal deficit</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="tia" data-log="Flagged: reduced consciousness"><span>Reduced consciousness</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="tia" data-log="Flagged: severe headache with deficit"><span>Severe headache with neurological deficit</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="tia" data-log="Flagged: posterior circulation signs"><span>Posterior circulation signs (ataxia, diplopia, dysarthria)</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="tia" data-log="Flagged: seizure at onset"><span>Seizure at onset</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="tia" data-log="Flagged: crescendo TIAs"><span>Crescendo TIAs (&ge;2 episodes in a week)</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="tia" data-log="Flagged: on anticoagulation"><span>Currently on anticoagulation</span></label>
+  </div>
+
+  <div class="status-banner status-pending" id="tia-status">Check red flags above to determine EMERGENCY vs. ROUTINE URGENT pathway</div>
+
+  <div class="section hidden-path" id="tia-emergency">
+    <div class="section-title" style="color:var(--warn)">Emergency Pathway</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Treated as emergency \u2014 same-day admission arranged, not routine TIA clinic"><span>Treat as an emergency — same-day admission, not routine TIA clinic referral</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Urgent CT/MRI brain arranged"><span>Urgent CT or MRI brain arranged</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Senior/stroke team review requested immediately"><span>Senior / stroke team review requested immediately</span></label>
+  </div>
+
+  <div class="section hidden-path" id="tia-routine">
+    <div class="section-title" style="color:var(--tia)">Routine Urgent Pathway</div>
+    <div class="counter-block">
+      <div class="counter-top"><div class="counter-label">Aspirin 300mg</div><div class="counter-display" id="aspirin-count">Not given</div></div>
+      <button class="counter-btn" style="background:var(--tia)" onclick="giveAspirin()" id="aspirin-btn">+ Give Aspirin 300mg Immediately</button>
+      <div class="textnote" style="margin:8px 0 0;">Unless contraindicated (bleeding disorder, already anticoagulated — discuss urgently) or onset &gt;48h ago.</div>
+    </div>
+    <div class="timer-block" id="tia-referral-block">
+      <div class="cycle-badge">Referral window</div>
+      <div class="timer-display" id="tia-referral-display">24:00:00</div>
+      <div class="timer-caption">Time left to be seen by specialist (target &lt;24h)</div>
+      <button onclick="startReferralClock()" id="tia-referral-btn">Start Referral Clock</button>
+    </div>
+    <div class="due-banner show stage-counting" style="display:block;background:#FCEFD6;color:var(--amber);">Key 2025 change: NICE advises <b>against</b> using ABCD2 (or similar risk scores) to triage, rule out, or delay referral. Every suspected TIA is referred urgently regardless of score.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Work-Up</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="ECG / ambulatory monitoring for AF arranged"><span>ECG / ambulatory monitoring for AF</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Diffusion-weighted MRI (or CT) brain arranged"><span>Diffusion-weighted MRI (or CT) brain</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Carotid imaging arranged (if anterior circulation & candidate for intervention)"><span>Carotid imaging if anterior circulation &amp; candidate for endarterectomy/stenting</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Bloods sent: FBC, glucose, lipids, coagulation"><span>Bloods: FBC, glucose, lipids, coagulation screen</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Longer-Term — Secondary Prevention</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Long-term antiplatelet/anticoagulation plan started"><span>Antiplatelet (clopidogrel) or anticoagulation (if AF) started</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="High-intensity statin started"><span>High-intensity statin started</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Blood pressure management plan agreed"><span>Blood pressure management plan agreed</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Driving/DVLA-RSA advice given and documented"><span>Driving advice given &amp; documented (DVLA / RSA rules)</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Smoking cessation, alcohol, lifestyle advice given"><span>Smoking cessation, alcohol, lifestyle advice given</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="tia" data-log="Safety-netting advice given: return immediately if symptoms recur"><span>Safety-netting: return immediately if symptoms recur</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Assessment Log</div>
+    <div class="logbox" id="tia-log"><div class="logempty">No actions logged yet.</div></div>
+  </div>
+</div>
+
+<!-- ================= 3. ISCHAEMIC STROKE ================= -->
+<div class="screen" id="screen-isch">
+  <div class="topbar" style="background:var(--isch)">
+    <button class="backbtn" onclick="showMenu()">&larr; Menu</button>
+    <div class="topbar-title">Ischaemic Stroke</div>
+    <button class="refbtn" onclick="openRefHub('isch')">&#128202; Ref</button>
+    <button class="resetbtn" id="resetbtn-isch" onclick="handleResetTap('isch')">Reset</button>
+  </div>
+  <div class="stopwatch" style="background:var(--isch-dark)">
+    <span class="time" id="isch-elapsed">00:00</span>
+    <button onclick="toggleStopwatch('isch')" id="isch-sw-btn">Start</button>
+  </div>
+  <div id="practice-banner-isch"></div>
+
+  <div class="section">
+    <div class="section-title">Onset / Last Known Well — Window Tracker</div>
+    <div class="textnote" style="margin:0 0 8px;">Enter the best-known clinical reference time. The elapsed time is calculated against the device clock.</div>
+    <div class="input-card">
+      <label class="input-label" for="onset-type-isch">Reference time</label>
+      <select class="clinical-select" id="onset-type-isch">
+        <option value="onset">Symptoms came on</option>
+        <option value="lkw">Last seen well</option>
+      </select>
+      <label class="input-label" for="onset-datetime-isch" style="margin-top:10px;">Date and time</label>
+      <input class="clinical-input" id="onset-datetime-isch" type="datetime-local">
+      <div class="input-error" id="onset-error-isch"></div>
+      <button class="counter-btn" style="background:var(--isch)" onclick="setOnsetReference('-isch')" id="onset-btn-isch">Calculate Time Difference</button>
+    </div>
+    <div class="timer-block" id="onset-timer-block-isch" style="display:none;">
+      <div class="cycle-badge" id="onset-badge-isch">Time since onset</div>
+      <div class="timer-display" id="onset-timer-display-isch">00:00:00</div>
+      <div class="timer-caption" id="onset-timer-caption-isch">Standard window closes at 4:30:00</div>
+    </div>
+    <div class="textnote">Target metrics: door-to-CT &lt;15&ndash;25 min; door-to-needle &lt;30&ndash;45 min; door-to-groin-puncture as fast as local pathways allow.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Eligibility Checklist</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="CT excludes haemorrhage"><span>Non-contrast CT excludes haemorrhage</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="Measurable, disabling neurological deficit confirmed"><span>Measurable, disabling neurological deficit confirmed</span></label>
+    <button class="counter-btn" style="background:var(--navy)" onclick="openRefHubFilter('isch','nihss')">Open NIHSS Calculator &rarr;</button>
+    <div class="nihss-sync-result" id="nihss-result-isch"></div>
+    <label class="check-row"><input type="checkbox" class="logcheck" id="nihss-doc-isch" data-tool="isch" data-log="NIHSS documented"><span>NIHSS documented</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Contraindications — Flag Any Present</div>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="isch" data-log="Contraindication: ICH on CT"><span>Evidence of intracranial haemorrhage on CT</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="isch" data-log="Contraindication: active bleeding/coagulopathy"><span>Active internal bleeding or bleeding diathesis</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="isch" data-log="Contraindication: therapeutic anticoagulation"><span>Therapeutic anticoagulation (INR &gt;1.7, or DOAC within dosing interval)</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="isch" data-log="Contraindication: platelets <100"><span>Platelets &lt;100 x10&#8313;/L</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="isch" data-log="Contraindication: recent major surgery/bleed"><span>Recent major surgery, GI/GU bleed, or intracranial surgery</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="isch" data-log="Contraindication: BP persistently >185/110"><span>BP persistently &gt;185/110 mmHg despite treatment</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="isch" data-log="Contraindication: prior ICH"><span>History of intracranial haemorrhage</span></label>
+  </div>
+
+  <div class="status-banner status-stable" id="isch-status">&#10003; No absolute contraindications flagged — thrombolysis may proceed if in window</div>
+
+  <div class="section">
+    <div class="section-title">Time Windows</div>
+    <div class="textnote" style="margin:0 0 6px;"><b>0&ndash;4.5h (standard):</b> alteplase or tenecteplase for confirmed acute ischaemic stroke with disabling deficit, haemorrhage excluded.</div>
+    <div class="textnote" style="margin:0 0 6px;"><b>4.5&ndash;9h (extended):</b> consider alteplase if CT-perfusion or MRI DWI-FLAIR mismatch shows salvageable tissue, incl. wake-up strokes.</div>
+  </div>
+
+  <div class="section">
+    <button class="counter-btn" style="background:var(--navy)" onclick="toggleEvidencePanel('thrombolysis')" id="thrombolysis-evidence-btn">&#128218; Thrombolysis — Risks, Benefits &amp; Evidence (NNT)</button>
+    <div class="hidden-path" id="thrombolysis-evidence-panel">
+
+      <div class="refitem" style="margin-top:14px;">
+        <div class="refitem-label" style="color:var(--isch)">IV Thrombolysis (Alteplase / Tenecteplase)</div>
+        <div class="refitem-box" style="border-color:var(--isch)">
+          <div class="refitem-tip"><b>Evidence base:</b> Stroke Thrombolysis Trialists' pooled individual-patient-data meta-analysis of 9 RCTs (Emberson et al., Lancet 2014, n=6,756); NINDS; ECASS III; IST-3; WAKE-UP trial (imaging-selected extended/wake-up window).</div>
+        </div>
+      </div>
+      <table class="summary-table">
+        <tr><th>Benefit</th><th>Figure</th></tr>
+        <tr><td>NNT for a better disability outcome — treated &le;90 min</td><td>~5</td></tr>
+        <tr><td>NNT — treated 91&ndash;180 min (&le;3h)</td><td>~9</td></tr>
+        <tr><td>NNT — treated 181&ndash;270 min (3&ndash;4.5h)</td><td>~19</td></tr>
+        <tr><td>WAKE-UP trial (imaging-selected, unknown onset)</td><td>NNT ~9 for favourable outcome (mRS 0&ndash;1)</td></tr>
+      </table>
+      <table class="summary-table">
+        <tr><th>Risk</th><th>Figure</th></tr>
+        <tr><td>Symptomatic intracranial haemorrhage (absolute risk increase)</td><td>~2&ndash;6% (NNH ~40&ndash;50)</td></tr>
+        <tr><td>Fatal intracranial haemorrhage (absolute risk increase)</td><td>~2&ndash;2.5% (NNH ~40)</td></tr>
+        <tr><td>Excess early deaths (first 7 days)</td><td>NNH ~71; no difference in mortality by 3&ndash;6 months (IST-3)</td></tr>
+      </table>
+      <div class="textnote" style="margin:8px 0 14px;">Benefit declines and risk stays roughly constant as time passes — this is why door-to-needle speed matters more than almost any other single factor.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="counter-block">
+      <div class="counter-top"><div class="counter-label">Thrombolysis (alteplase/tenecteplase)</div><div class="counter-display" id="thromb-count">Not given</div></div>
+      <button class="counter-btn" style="background:var(--isch)" onclick="giveThrombolysis()" id="thromb-btn">+ Log Thrombolysis Administered</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <button class="counter-btn" style="background:var(--navy)" onclick="toggleEvidencePanel('thrombectomy')" id="thrombectomy-evidence-btn">&#128218; Thrombectomy — Risks, Benefits &amp; Evidence (NNT)</button>
+    <div class="hidden-path" id="thrombectomy-evidence-panel">
+      <div class="refitem">
+        <div class="refitem-label" style="color:var(--isch)">Mechanical Thrombectomy</div>
+        <div class="refitem-box" style="border-color:var(--isch)">
+          <div class="refitem-tip"><b>Evidence base:</b> HERMES collaboration pooled analysis of 5 RCTs (MR CLEAN, ESCAPE, REVASCAT, SWIFT PRIME, EXTEND-IA, n=1,287); extended-window DAWN &amp; DEFUSE-3 trials; large-core trials (SELECT2, ANGEL-ASPECT, TENSION) for the 6&ndash;24h/large-core population.</div>
+        </div>
+      </div>
+      <table class="summary-table">
+        <tr><th>Benefit</th><th>Figure</th></tr>
+        <tr><td>NNT for &ge;1-level improvement on mRS at 90 days (HERMES)</td><td>~2.6</td></tr>
+        <tr><td>NNT for functional independence, mRS 0&ndash;2 (HERMES)</td><td>~5</td></tr>
+        <tr><td>Extended window: DAWN trial</td><td>NNT ~2.8</td></tr>
+        <tr><td>Extended window: DEFUSE-3 trial</td><td>NNT ~3.6</td></tr>
+        <tr><td>Large-core / extended-eligibility trials</td><td>NNT ~4 (ordinal shift); ~7 (functional independence)</td></tr>
+      </table>
+      <table class="summary-table">
+        <tr><th>Risk</th><th>Figure</th></tr>
+        <tr><td>Symptomatic ICH</td><td>Not significantly increased vs. medical management in standard-window HERMES pooling; higher (~5&ndash;7% vs ~3%) in some large-core trials</td></tr>
+        <tr><td>Vessel perforation</td><td>~1&ndash;6% of procedures; ~50% mortality if it occurs</td></tr>
+        <tr><td>Embolization to a new territory</td><td>~6%</td></tr>
+        <tr><td>Arterial dissection</td><td>~3%</td></tr>
+        <tr><td>Access-site complications</td><td>~2%</td></tr>
+      </table>
+      <div class="textnote" style="margin:8px 0 0;">These are trial-derived population estimates, not individual predictions. Actual risk/benefit varies with age, comorbidities, baseline NIHSS, ASPECTS, and time to treatment — use to inform, not replace, shared decision-making and consent discussion.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Thrombectomy — Select Presentation</div>
+    <div class="pathbtns">
+      <button class="pathbtn" onclick="setThrombectomyPath(this,'a','0\u20136h anterior circulation LVO selected')">0&ndash;6h<br>Anterior LVO</button>
+      <button class="pathbtn" onclick="setThrombectomyPath(this,'b','6\u201324h anterior circulation LVO (mismatch) selected')">6&ndash;24h<br>Anterior LVO</button>
+      <button class="pathbtn" onclick="setThrombectomyPath(this,'c','Posterior circulation \u226412h selected')">&le;12h<br>Posterior</button>
+    </div>
+    <div class="textnote" id="thrombectomy-note">Select a presentation to see the matching criteria.</div>
+    <div class="counter-block">
+      <div class="counter-top"><div class="counter-label">Thrombectomy</div><div class="counter-display" id="thrombectomy-count">Not performed</div></div>
+      <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="CTA obtained confirming LVO"><span>CTA obtained confirming large-vessel occlusion</span></label>
+      <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="Thrombectomy-capable centre contacted"><span>Thrombectomy-capable centre contacted</span></label>
+      <button class="counter-btn" style="background:var(--navy)" onclick="giveThrombectomy()" id="thrombectomy-btn">+ Log Thrombectomy Performed</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Post-Thrombolysis Monitoring</div>
+    <div class="timer-block" id="obs-timer-block">
+      <div class="timer-display" id="obs-timer-display">15:00</div>
+      <div class="timer-caption" id="obs-timer-caption">Next neuro-obs due (q15min &times;2h)</div>
+      <button onclick="startObsCycle()" id="obs-btn">Start Post-Thrombolysis Obs Timer</button>
+    </div>
+    <div class="textnote">Schedule: every 15 min &times;2h &rarr; every 30 min &times;6h &rarr; hourly to 24h. Tap "Next Stage" as each phase completes.</div>
+    <button class="counter-btn" style="background:var(--muted)" onclick="advanceObsStage()" id="obs-advance-btn">Advance To Next Monitoring Stage</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Watch For Haemorrhagic Transformation</div>
+    <label class="check-row"><input type="checkbox" class="symptom-check2" data-tool="isch" data-log="Flagged: sudden GCS drop / new headache"><span>Sudden drop in GCS, new severe headache</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check2" data-tool="isch" data-log="Flagged: acute BP rise / new vomiting"><span>Acute rise in BP, new vomiting</span></label>
+    <div class="status-banner status-stable" id="isch-htransform-status">No red flags for haemorrhagic transformation</div>
+    <button class="counter-btn" style="background:var(--warn)" onclick="routeTo('haem','Suspected haemorrhagic transformation \u2014 routed to Haemorrhagic Stroke pathway')">&#9888; Suspected Transformation — Go To Haemorrhagic Pathway</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Practical Precautions (First 24h)</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="No antiplatelets/anticoagulants for 24h after thrombolysis"><span>No antiplatelets/anticoagulants for 24h</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="Avoided arterial punctures/NG tubes where possible"><span>Avoid arterial punctures/NG tubes if avoidable</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="Repeat CT at 24h planned before starting antithrombotics"><span>Repeat CT at 24h planned before starting antithrombotics</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Longer-Term — Secondary Prevention</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="Antiplatelet/anticoagulation plan for secondary prevention agreed"><span>Antiplatelet or anticoagulation plan agreed (post-24h scan)</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="High-intensity statin started"><span>High-intensity statin started</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="Carotid intervention considered if symptomatic stenosis"><span>Carotid endarterectomy/stenting considered if symptomatic stenosis</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="AF detection: extended ECG monitoring arranged"><span>Extended ECG monitoring arranged if cryptogenic</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="isch" data-log="Early rehabilitation and stroke unit MDT input arranged"><span>Early rehabilitation &amp; stroke unit MDT input arranged</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Assessment Log</div>
+    <div class="logbox" id="isch-log"><div class="logempty">No actions logged yet.</div></div>
+  </div>
+</div>
+
+<!-- ================= 4. HAEMORRHAGIC STROKE ================= -->
+<div class="screen" id="screen-haem">
+  <div class="topbar" style="background:var(--haem)">
+    <button class="backbtn" onclick="showMenu()">&larr; Menu</button>
+    <div class="topbar-title">Haemorrhagic Stroke</div>
+    <button class="refbtn" onclick="openRefHub('haem')">&#128202; Ref</button>
+    <button class="resetbtn" id="resetbtn-haem" onclick="handleResetTap('haem')">Reset</button>
+  </div>
+  <div class="stopwatch" style="background:var(--haem-dark)">
+    <span class="time" id="haem-elapsed">00:00</span>
+    <button onclick="toggleStopwatch('haem')" id="haem-sw-btn">Start</button>
+  </div>
+  <div id="practice-banner-haem"></div>
+
+  <div class="section">
+    <div class="section-title">Clinical Clues (No Sign Is Definitive — CT Confirms)</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Severe headache at onset noted"><span>Severe headache at onset ("worst of life")</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Rapidly progressive deficit noted"><span>Rapidly progressive deficit (worsening over minutes)</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Early reduced consciousness / vomiting noted"><span>Early reduced consciousness or vomiting</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Markedly elevated BP at presentation noted"><span>Markedly elevated BP at presentation</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Anticoagulant/antiplatelet use confirmed"><span>Anticoagulant or antiplatelet use</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Seizure at onset noted"><span>Seizure at onset</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Confirm &amp; Characterise</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Non-contrast CT confirms ICH; volume/location/extension noted"><span>Non-contrast CT confirms diagnosis — note volume, location, IVH, midline shift</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="CTA requested for spot sign (expansion risk)"><span>CT angiography requested — "spot sign" predicts expansion</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Coagulation screen sent: FBC, PT/INR, APTT, fibrinogen"><span>Coagulation screen sent: FBC, PT/INR, APTT, fibrinogen</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Anticoagulant history confirmed: agent, last dose, renal function"><span>Anticoagulant history: exact agent, last dose time, renal function</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Treatment Bundle — INTERACT3 (Start All Elements Early &amp; Together)</div>
+    <div class="timer-block" id="bp-timer-block">
+      <div class="cycle-badge">BP target</div>
+      <div class="timer-display" id="bp-timer-display">60:00</div>
+      <div class="timer-caption">Lower SBP &lt;140 mmHg smoothly within this hour</div>
+      <button onclick="startBpClock()" id="bp-btn">Start BP Target Clock</button>
+    </div>
+    <div class="textnote">Avoid overcorrection: don't lower SBP below 130 mmHg or drop &gt;60 mmHg from baseline in the first hour.</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Glucose control protocol started"><span>Glucose control: protocol-based, keep within normal range</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Temperature control started, target <=37.5C"><span>Temperature control: treat fever, target &le;37.5&deg;C</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Anticoagulation Reversal — Select Agent</div>
+    <div class="pathbtns">
+      <button class="pathbtn" onclick="setReversalPath(this,'vka','Warfarin/VKA reversal pathway selected')">Warfarin<br>/ VKA</button>
+      <button class="pathbtn" onclick="setReversalPath(this,'dabi','Dabigatran reversal pathway selected')">Dabigatran</button>
+      <button class="pathbtn" onclick="setReversalPath(this,'xa','Factor Xa inhibitor reversal pathway selected')">Riva/Api/<br>Edoxaban</button>
+    </div>
+    <div class="textnote" id="reversal-note">Select the anticoagulant to see the specific reversal steps. Discontinue anticoagulation immediately in every case, regardless of agent.</div>
+    <div class="counter-block">
+      <div class="counter-top"><div class="counter-label">Reversal Agent</div><div class="counter-display" id="reversal-count">Not given</div></div>
+      <button class="counter-btn" style="background:var(--haem)" onclick="giveReversal()" id="reversal-btn">+ Log Reversal Agent Given</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Neurosurgical Referral — Flag Any That Apply</div>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="haem" data-log="Flagged: cerebellar haemorrhage >3cm"><span>Cerebellar haemorrhage &gt;3cm or with brainstem compression</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="haem" data-log="Flagged: hydrocephalus"><span>Hydrocephalus / intraventricular extension</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="haem" data-log="Flagged: large lobar haemorrhage with mass effect"><span>Large lobar haemorrhage with mass effect</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="haem" data-log="Flagged: deteriorating GCS with surgical lesion"><span>Deteriorating GCS with a surgical lesion</span></label>
+    <label class="check-row"><input type="checkbox" class="symptom-check" data-tool="haem" data-log="Flagged: underlying structural lesion suspected"><span>Underlying aneurysm/AVM/tumour suspected</span></label>
+  </div>
+  <div class="status-banner status-stable" id="haem-status">No neurosurgical referral criteria flagged — continue medical management</div>
+
+  <div class="section">
+    <div class="section-title">Aetiology Screen</div>
+    <div class="textnote" style="margin:0;">Consider a structured approach — <b>SMASH-U</b>: Structural, Medication, Amyloid, Systemic, Hypertension, Undetermined.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Longer-Term Considerations</div>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Decision on future antithrombotic use documented with neurology/haematology input"><span>Future antithrombotic-use decision documented (specialist input)</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Underlying aetiology addressed (e.g. BP control for hypertensive ICH)"><span>Underlying aetiology addressed (e.g. strict BP control for hypertensive ICH)</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Rehabilitation and stroke unit MDT input arranged"><span>Rehabilitation &amp; stroke unit MDT input arranged</span></label>
+    <label class="check-row"><input type="checkbox" class="logcheck" data-tool="haem" data-log="Goals-of-care / ceiling-of-care conversation had if appropriate"><span>Goals-of-care conversation had if appropriate</span></label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Assessment Log</div>
+    <div class="logbox" id="haem-log"><div class="logempty">No actions logged yet.</div></div>
+  </div>
+</div>
+
+<!-- ================= REFERENCE HUB ================= -->
+<div class="screen" id="screen-refhub">
+  <div class="topbar" style="background:var(--navy)">
+    <button class="backbtn" onclick="closeRefHub()">&larr; Back</button>
+    <div class="topbar-title">Reference Tools</div>
+  </div>
+  <div class="section" style="padding-top:14px;">
+    <div class="textnote" style="margin:0 0 10px;">Tap a category to jump to it.</div>
+    <div class="flag-strip">
+      <button class="flag-btn ref-filter-btn active" data-cat="all" onclick="filterRefHub('all')">All</button>
+      <button class="flag-btn ref-filter-btn" data-cat="nihss" onclick="filterRefHub('nihss')">NIHSS Calculator</button>
+      <button class="flag-btn ref-filter-btn" data-cat="mimics" onclick="filterRefHub('mimics')">Stroke Mimics</button>
+      <button class="flag-btn ref-filter-btn" data-cat="bamford" onclick="filterRefHub('bamford')">Bamford Classifier</button>
+    </div>
+  </div>
+
+  <!-- ---- NIHSS Calculator ---- -->
+  <div class="section ref-cat" data-cat="nihss">
+    <div class="section-title" style="color:var(--isch)">NIHSS Calculator</div>
+    <div class="textnote" style="margin:0 0 10px;">Based on the official NIH Stroke Scale (Rev 10/1/2003). Tap a score for each item — the total updates live. Score what the patient <b>does</b>, not what you think they could do.</div>
+
+    <div class="nihss-total-block">
+      <div class="nihss-total-num" id="nihss-total">0</div>
+      <div class="nihss-total-label">NIHSS Total (0&ndash;42)</div>
+      <div class="nihss-total-band" id="nihss-band" style="background:rgba(255,255,255,0.15);color:#fff;">No stroke symptoms</div>
+      <button class="counter-btn" style="background:rgba(255,255,255,0.2);margin-top:10px;" onclick="resetNihss()">Reset NIHSS</button>
+    </div>
+
+    <div id="nihss-items"></div>
+  </div>
+
+  <!-- ---- Stroke Mimics ---- -->
+  <div class="section ref-cat" data-cat="mimics">
+    <div class="section-title" style="color:var(--tia)">Stroke Mimics — Differentiating Features</div>
+    <div class="textnote" style="margin:0 0 10px;">Mimics account for up to a third of "suspected strokes." Recognising them prevents inappropriate thrombolysis — but uncertainty should never delay urgent referral when stroke remains plausible.</div>
+
+    <div class="refitem">
+      <div class="refitem-label" style="color:var(--tia)">Seizure / Todd's Paresis</div>
+      <div class="refitem-box" style="border-color:var(--tia)">
+        <div class="refitem-tip">Commonest mimic (~13&ndash;23%). Post-ictal focal weakness or dysphasia can last hours to days. Look for a witnessed seizure, tongue-biting, incontinence, or a known epilepsy history.</div>
+      </div>
+    </div>
+    <div class="refitem">
+      <div class="refitem-label" style="color:var(--tia)">Hypoglycaemia</div>
+      <div class="refitem-box" style="border-color:var(--tia)">
+        <div class="refitem-tip">Always check glucose first — neuroglycopenia can produce pure focal deficits that resolve completely with correction.</div>
+      </div>
+    </div>
+    <div class="refitem">
+      <div class="refitem-label" style="color:var(--tia)">Migraine With Aura</div>
+      <div class="refitem-box" style="border-color:var(--tia)">
+        <div class="refitem-tip">Gradual march of visual/sensory symptoms over minutes, headache, prior similar episodes. Hemiplegic migraine is a recognised, less common mimic.</div>
+      </div>
+    </div>
+    <div class="refitem">
+      <div class="refitem-label" style="color:var(--tia)">Sepsis / Metabolic (e.g. Hyponatraemia)</div>
+      <div class="refitem-box" style="border-color:var(--tia)">
+        <div class="refitem-tip">"Recrudescence" — decompensation of an old lesion. Systemically unwell; deficits resolve as the metabolic derangement is corrected.</div>
+      </div>
+    </div>
+    <div class="refitem">
+      <div class="refitem-label" style="color:var(--tia)">Syncope</div>
+      <div class="refitem-box" style="border-color:var(--tia)">
+        <div class="refitem-tip">Brief loss of consciousness, rapid full recovery, no persisting focal signs.</div>
+      </div>
+    </div>
+    <div class="refitem">
+      <div class="refitem-label" style="color:var(--tia)">Functional Neurological Disorder</div>
+      <div class="refitem-box" style="border-color:var(--tia)">
+        <div class="refitem-tip">Inconsistent exam findings — e.g. a positive Hoover's sign (involuntary hip extension when the "good" leg is asked to flex against resistance).</div>
+      </div>
+    </div>
+
+    <table class="summary-table">
+      <tr><th>Feature</th><th>Favours stroke/TIA</th><th>Favours mimic</th></tr>
+      <tr><td><b>Onset</b></td><td>Sudden, maximal at onset</td><td>Gradual march, or preceded by seizure</td></tr>
+      <tr><td><b>Deficit</b></td><td>Negative symptoms, fits a vascular territory</td><td>Positive symptoms (jerking, spreading tingling)</td></tr>
+      <tr><td><b>Consciousness</b></td><td>Usually preserved</td><td>Often impaired at onset</td></tr>
+      <tr><td><b>History</b></td><td>Vascular risk factors, AF, prior TIA</td><td>Migraine/epilepsy history, recent illness</td></tr>
+      <tr><td><b>Glucose/lytes</b></td><td>Normal</td><td>Hypoglycaemia/hyponatraemia present</td></tr>
+      <tr><td><b>Exam</b></td><td>Consistent, reproducible</td><td>Inconsistent / variable</td></tr>
+      <tr><td><b>Imaging</b></td><td>Acute infarct/haemorrhage/occlusion</td><td>Normal, or unrelated old lesion</td></tr>
+    </table>
+  </div>
+
+  <!-- ---- Bamford Classifier ---- -->
+  <div class="section ref-cat" data-cat="bamford">
+    <div class="section-title" style="color:var(--isch)">Bamford / Oxford Classifier (Ischaemic Stroke)</div>
+    <div class="textnote" style="margin:0 0 10px;">Bedside classification using presenting signs, before imaging is available. Check the features present — the likely subtype updates live. Once CT confirms pathology, add: I = infarct, H = haemorrhage, S = syndrome (pre-imaging).</div>
+
+    <div class="bamford-result" id="bamford-result" style="background:var(--muted);">
+      <div class="bamford-result-code" id="bamford-code">—</div>
+      <div class="bamford-result-name" id="bamford-name">Check features below</div>
+    </div>
+
+    <label class="check-row"><input type="checkbox" class="bamford-check" id="bam-motor" data-log="Bamford: motor/sensory deficit (face+arm, or face+arm+leg)"><span>Motor/sensory deficit — face, arm and/or leg (2 or more of the 3 = counts fully)</span></label>
+    <label class="check-row"><input type="checkbox" class="bamford-check" id="bam-hemianopia" data-log="Bamford: homonymous hemianopia present"><span>Homonymous hemianopia (same visual field lost in both eyes)</span></label>
+    <label class="check-row"><input type="checkbox" class="bamford-check" id="bam-cortical" data-log="Bamford: higher cortical dysfunction present"><span>Higher cortical dysfunction (dysphasia, visuospatial neglect)</span></label>
+    <label class="check-row"><input type="checkbox" class="bamford-check" id="bam-brainstem" data-log="Bamford: brainstem/cerebellar signs present"><span>Brainstem/cerebellar signs (vertigo, diplopia, ataxia, crossed signs)</span></label>
+    <label class="check-row"><input type="checkbox" class="bamford-check" id="bam-lacunar" data-log="Bamford: pure lacunar syndrome, no cortical signs"><span>Pure motor / pure sensory / sensorimotor / ataxic hemiparesis, with <b>no</b> cortical signs</span></label>
+
+    <table class="summary-table">
+      <tr><th>Code</th><th>Criteria</th></tr>
+      <tr><td><b>TACI</b></td><td>ALL 3 of: motor/sensory deficit, homonymous hemianopia, higher cortical dysfunction</td></tr>
+      <tr><td><b>PACI</b></td><td>2 of the 3 TACI features, OR isolated higher cortical dysfunction</td></tr>
+      <tr><td><b>POCI</b></td><td>Brainstem/cerebellar signs, isolated hemianopia, or crossed signs</td></tr>
+      <tr><td><b>LACI</b></td><td>Pure motor/sensory/sensorimotor/ataxic hemiparesis — no cortical signs, ever</td></tr>
+    </table>
+    <div class="textnote">LACI is only valid if there is no dysphasia and no neglect, however focal the deficit looks. Developed for infarcts, but can also describe haemorrhages once imaging confirms type.</div>
+  </div>
+</div>
+
+<!-- ================= TRAINING SCENARIOS — LIST ================= -->
+<div class="screen" id="screen-scenarios">
+  <div class="topbar" style="background:var(--train)">
+    <button class="backbtn" onclick="showMenu()">&larr; Menu</button>
+    <div class="topbar-title">Training Scenarios</div>
+  </div>
+  <div class="section" style="padding-top:14px;">
+    <div class="textnote" style="margin:0 0 14px;">10 practice cases spanning TIA, ischaemic stroke, haemorrhagic stroke and common mimics — presented blind, no diagnosis given away. Read each vignette as if the patient has just arrived, work through your assessment, commit to a differential, then see the full breakdown and open the matching tool to practise the checklist.</div>
+    <div id="scenario-list"></div>
+  </div>
+</div>
+
+<!-- ================= TRAINING SCENARIOS — DETAIL ================= -->
+<div class="screen" id="screen-scenario-detail">
+  <div class="topbar" style="background:var(--train)">
+    <button class="backbtn" onclick="showScreen('scenarios')">&larr; Cases</button>
+    <div class="topbar-title" id="scenario-detail-title">Case</div>
+  </div>
+  <div class="section" style="padding-top:14px;" id="scenario-detail-content"></div>
+</div>
+
+<!-- ================= BOTTOM NAVIGATION ================= -->
+<div class="bottomnav" id="bottomnav">
+  <button onclick="navGo('menu')" data-navkey="menu"><span class="nav-icon">&#127968;</span>Menu</button>
+  <button onclick="navGo('assess')" data-navkey="assess"><span class="nav-icon">&#129658;</span>Assess</button>
+  <button onclick="navGo('tia')" data-navkey="tia"><span class="nav-icon">&#9201;</span>TIA</button>
+  <button onclick="navGo('isch')" data-navkey="isch"><span class="nav-icon">&#129504;</span>Isch.</button>
+  <button onclick="navGo('haem')" data-navkey="haem"><span class="nav-icon">&#129656;</span>Haem.</button>
+  <button onclick="navGo('refhub')" data-navkey="refhub"><span class="nav-icon">&#128202;</span>Ref</button>
+  <button onclick="navGo('scenarios')" data-navkey="scenarios"><span class="nav-icon">&#127891;</span>Train</button>
+</div>
+
+</div><!-- /.wrap -->
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+function freshState(tool){
+  const base = { swInterval:null, elapsedMs:0, running:false, log:[], resetStage:0, resetArmTimeout:null };
+  if(tool==='assess') return Object.assign(base, {});
+  if(tool==='tia') return Object.assign(base, { aspirinGiven:false, referralInterval:null, referralRemaining:0 });
+  if(tool==='isch') return Object.assign(base, { thrombGiven:false, thrombectomyGiven:false, thrombectomyPath:null, obsStageIdx:0, obsInterval:null, obsRemaining:0 });
+  if(tool==='haem') return Object.assign(base, { bpInterval:null, bpRemaining:0, reversalPath:null, reversalGiven:false });
+  return base;
+}
+const state = { assess: freshState('assess'), tia: freshState('tia'), isch: freshState('isch'), haem: freshState('haem') };
+
+function nowClock(){ return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+function fmt(ms){
+  const s = Math.max(Math.floor(ms/1000),0);
+  const m = Math.floor(s/60);
+  const r = s%60;
+  return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
+}
+function fmtHMS(ms){
+  const s = Math.max(Math.floor(ms/1000),0);
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const r = s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function showMenu(){
+  document.getElementById('menu').style.display='block';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  updateBottomNav();
+}
+function showScreen(key){
+  document.getElementById('menu').style.display='none';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+key).classList.add('active');
+  updateBottomNav();
+}
+function routeTo(toTool, msg){
+  // log into whichever tool screen is currently visible, if it has a log
+  const activeScreen = document.querySelector('.screen.active');
+  if(activeScreen){
+    const fromTool = activeScreen.id.replace('screen-','');
+    if(state[fromTool]) logEvent(fromTool, msg);
+  }
+  showScreen(toTool);
+}
+
+// ---- Bottom Navigation Bar ----
+function currentActiveKey(){
+  if(document.getElementById('menu').style.display !== 'none') return 'menu';
+  const activeScreen = document.querySelector('.screen.active');
+  return activeScreen ? activeScreen.id.replace('screen-','') : 'menu';
+}
+function updateBottomNav(){
+  let key = currentActiveKey();
+  if(key === 'scenario-detail') key = 'scenarios';
+  document.querySelectorAll('.bottomnav button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.navkey === key);
+  });
+}
+function navGo(key){
+  if(key==='menu'){ showMenu(); }
+  else if(key==='refhub'){ openRefHub(currentActiveKey()==='refhub' ? 'menu' : currentActiveKey()); }
+  else { showScreen(key); }
+}
+
+// ---- Reference Hub (reachable from the menu or from any tool) ----
+let refHubReturnTo = 'menu';
+function openRefHub(fromKey){
+  refHubReturnTo = fromKey;
+  document.getElementById('menu').style.display = 'none';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-refhub').classList.add('active');
+  updateBottomNav();
+}
+function openRefHubFilter(fromKey, cat){
+  openRefHub(fromKey);
+  filterRefHub(cat);
+}
+function closeRefHub(){
+  if(refHubReturnTo === 'menu'){ showMenu(); }
+  else { showScreen(refHubReturnTo); }
+}
+function filterRefHub(cat){
+  document.querySelectorAll('.ref-filter-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
+  document.querySelectorAll('.ref-cat').forEach(sec=>{
+    const show = (cat === 'all') || (sec.dataset.cat === cat);
+    sec.classList.toggle('ref-hidden', !show);
+  });
+}
+
+// ============================================================
+// STOPWATCH (per tool)
+// ============================================================
+function toggleStopwatch(tool){
+  const st = state[tool];
+  const btn = document.getElementById(tool+'-sw-btn');
+  if(!st.running){
+    st.running = true;
+    btn.textContent = 'Pause';
+    const startedAt = Date.now() - st.elapsedMs;
+    st.swInterval = setInterval(()=>{
+      st.elapsedMs = Date.now() - startedAt;
+      document.getElementById(tool+'-elapsed').textContent = fmt(st.elapsedMs);
+    }, 250);
+  } else {
+    st.running = false;
+    btn.textContent = 'Resume';
+    clearInterval(st.swInterval);
+    st.swInterval = null;
+  }
+}
+
+// ============================================================
+// GENERIC LOGGING
+// ============================================================
+function logEvent(tool, text){
+  const st = state[tool];
+  if(!st) return;
+  st.log.unshift({time: nowClock(), text});
+  renderLog(tool);
+}
+function renderLog(tool){
+  const box = document.getElementById(tool+'-log');
+  if(!box) return;
+  const st = state[tool];
+  if(st.log.length===0){ box.innerHTML = '<div class="logempty">No actions logged yet.</div>'; return; }
+  box.innerHTML = st.log.map(e=>`<div class="logentry">${escapeHtml(e.time)} — ${escapeHtml(e.text)}</div>`).join('');
+}
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g,ch=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  })[ch]);
+}
+
+function wireLogChecks(){
+  document.querySelectorAll('.logcheck').forEach(cb=>{
+    cb.onchange = function(){
+      const row = this.closest('.check-row');
+      const tool = this.dataset.tool;
+      if(this.checked){
+        row.classList.add('done');
+        logEvent(tool, this.dataset.log);
+      } else {
+        row.classList.remove('done');
+      }
+    };
+  });
+}
+wireLogChecks();
+updateBottomNav();
+
+// ============================================================
+// GENERIC COUNTDOWN ENGINE (drives every timed prompt)
+// ============================================================
+function runCountdown(tool, name, seconds, handlers){
+  const st = state[tool];
+  const intervalKey = name+'Interval';
+  const remainKey = name+'Remaining';
+  if(st[intervalKey]){ clearInterval(st[intervalKey]); st[intervalKey]=null; }
+  st[remainKey] = seconds;
+  handlers.onTick(st[remainKey]);
+  st[intervalKey] = setInterval(()=>{
+    st[remainKey] -= 1;
+    if(handlers.onWarn && handlers.warnAt !== undefined ? st[remainKey] === handlers.warnAt : st[remainKey] === 10 && handlers.onWarn) handlers.onWarn();
+    if(st[remainKey] <= 0){
+      clearInterval(st[intervalKey]);
+      st[intervalKey] = null;
+      handlers.onDue();
+      return;
+    }
+    handlers.onTick(st[remainKey]);
+  }, 1000);
+}
+function stopCountdown(tool, name){
+  const st = state[tool];
+  const intervalKey = name+'Interval';
+  if(st[intervalKey]){ clearInterval(st[intervalKey]); st[intervalKey]=null; }
+}
+
+// ============================================================
+// BEEP (Web Audio, no external file)
+// ============================================================
+let actx;
+function beep(freq, dur, vol){
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type='sine'; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime+dur);
+  }catch(e){ /* audio not available, ignore */ }
+}
+function warnBeep(){ beep(660,0.18,0.12); }
+function alarmBeep(){ beep(880,0.28,0.18); setTimeout(()=>beep(880,0.28,0.18), 320); }
+
+// ============================================================
+// SYMPTOM-CHECK STATUS BANNER ENGINE (generic, class + tool scoped)
+// ============================================================
+function wireSymptomChecks(cssClass, tool, cb){
+  document.querySelectorAll('.'+cssClass+'[data-tool="'+tool+'"]').forEach(el=>{
+    el.onchange = function(){
+      const row = this.closest('.check-row');
+      if(this.checked){ row.classList.add('done'); logEvent(tool, this.dataset.log); }
+      else { row.classList.remove('done'); }
+      cb();
+    };
+  });
+}
+function anyChecked(cssClass, tool){
+  return Array.from(document.querySelectorAll('.'+cssClass+'[data-tool="'+tool+'"]')).some(c=>c.checked);
+}
+
+// ============================================================
+// 1. RAPID ASSESSMENT TOOL
+// ============================================================
+function flagHypo(){
+  const banner = document.getElementById('hypo-banner');
+  banner.classList.add('show','stage-alarm');
+  banner.textContent = 'Hypoglycaemia found — treat immediately and reconsider a stroke mimic before proceeding further.';
+  logEvent('assess','Hypoglycaemia flagged — treated as likely mimic, re-assess after correction');
+}
+
+let onsetClocks = {};
+let onsetReferenceTimes = {};
+function renderOnsetElapsed(suffix){
+  suffix = suffix || '';
+  const referenceTime = onsetReferenceTimes[suffix];
+  if(!referenceTime) return;
+  const toolKey = suffix === '-isch' ? 'isch' : 'assess';
+  const elapsedSec = Math.max(0, Math.floor((Date.now()-referenceTime)/1000));
+  const disp = document.getElementById('onset-timer-display'+suffix);
+  const block = document.getElementById('onset-timer-block'+suffix);
+  const cap = document.getElementById('onset-timer-caption'+suffix);
+  disp.textContent = fmtHMS(elapsedSec*1000);
+  block.classList.remove('stage-warn','stage-alarm');
+  if(elapsedSec < 16200){
+    cap.textContent = 'Standard 4.5h window — '+fmtHMS((16200-elapsedSec)*1000)+' remaining';
+  } else if(elapsedSec < 32400){
+    block.classList.add('stage-warn');
+    cap.textContent = 'Extended window — imaging-based selection only; '+fmtHMS((32400-elapsedSec)*1000)+' to 9h';
+  } else {
+    block.classList.add('stage-alarm');
+    cap.textContent = 'Standard and extended IV thrombolysis windows have passed';
+  }
+}
+function setOnsetReference(suffix){
+  suffix = suffix || '';
+  const input = document.getElementById('onset-datetime'+suffix);
+  const type = document.getElementById('onset-type'+suffix);
+  const error = document.getElementById('onset-error'+suffix);
+  const chosen = input.value ? new Date(input.value) : null;
+  if(!chosen || Number.isNaN(chosen.getTime())){
+    error.textContent = 'Enter a valid date and time.';
+    error.classList.add('show');
+    return;
+  }
+  if(chosen.getTime() > Date.now()+60000){
+    error.textContent = 'The reference time cannot be in the future.';
+    error.classList.add('show');
+    return;
+  }
+  error.textContent = '';
+  error.classList.remove('show');
+  if(onsetClocks[suffix]) clearInterval(onsetClocks[suffix]);
+  onsetReferenceTimes[suffix] = chosen.getTime();
+  document.getElementById('onset-timer-block'+suffix).style.display='block';
+  document.getElementById('onset-badge'+suffix).textContent = type.value === 'lkw' ? 'Time since last seen well' : 'Time since symptom onset';
+  document.getElementById('onset-btn'+suffix).textContent = 'Update Time Difference';
+  const toolKey = suffix === '-isch' ? 'isch' : 'assess';
+  const label = type.value === 'lkw' ? 'Last seen well' : 'Symptom onset';
+  logEvent(toolKey, label+' entered: '+chosen.toLocaleString()+'; elapsed '+fmtHMS(Date.now()-chosen.getTime()));
+  renderOnsetElapsed(suffix);
+  onsetClocks[suffix] = setInterval(()=>renderOnsetElapsed(suffix),1000);
+}
+
+let lastCtaOther = '';
+let selectedCtRoute = null;
+let selectedCtMessage = '';
+function selectCtResult(btn,toTool,msg){
+  selectedCtRoute = toTool;
+  selectedCtMessage = msg;
+  document.querySelectorAll('#cta-followup').forEach(el=>el.style.display='block');
+  document.querySelectorAll('#screen-assess .section .pathbtns .pathbtn').forEach(b=>b.style.outline='none');
+  btn.style.outline = '4px solid #111827';
+  logEvent('assess',msg.replace(' — routed to ',' — selected pathway: '));
+  document.getElementById('cta-followup').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function continueAfterImaging(){
+  if(!selectedCtRoute) return;
+  routeTo(selectedCtRoute,selectedCtMessage);
+}
+function updateCtaPerformed(){
+  const performed = document.getElementById('cta-performed').value;
+  const resultWrap = document.getElementById('cta-result-wrap');
+  resultWrap.style.display = performed === 'yes' ? 'block' : 'none';
+  if(performed === 'yes') logEvent('assess','CT angiography performed');
+  if(performed === 'no') logEvent('assess','CT angiography not performed');
+  if(performed !== 'yes'){
+    document.getElementById('cta-result').value = '';
+    document.getElementById('cta-other-wrap').style.display = 'none';
+  }
+}
+function updateCtaResult(){
+  const result = document.getElementById('cta-result').value;
+  document.getElementById('cta-other-wrap').style.display = result === 'other' ? 'block' : 'none';
+  if(result === 'lvo') logEvent('assess','CTA result: LVO identified');
+  if(result === 'no-lvo') logEvent('assess','CTA result: no LVO identified');
+  if(result === 'other') logEvent('assess','CTA result: other finding selected');
+}
+function logCtaOther(){
+  const value = document.getElementById('cta-other').value.trim();
+  if(value && value !== lastCtaOther){
+    lastCtaOther = value;
+    logEvent('assess','CTA other finding documented: '+value);
+  }
+}
+
+function wireRosier(){
+  document.querySelectorAll('.rosier-check').forEach(cb=>{
+    cb.onchange = function(){
+      const row = this.closest('.check-row');
+      if(this.checked){ row.classList.add('done'); logEvent('assess', this.dataset.log); }
+      else { row.classList.remove('done'); }
+      updateRosierTotal();
+    };
+  });
+}
+function updateRosierTotal(){
+  let total=0;
+  document.querySelectorAll('.rosier-check:checked').forEach(cb=>{ total+=parseInt(cb.dataset.pts,10); });
+  document.getElementById('rosier-total').textContent = total;
+}
+wireRosier();
+
+// ============================================================
+// 2. TIA TOOL
+// ============================================================
+function updateTiaStatus(){
+  const flagged = anyChecked('symptom-check','tia');
+  const banner = document.getElementById('tia-status');
+  const emerg = document.getElementById('tia-emergency');
+  const routine = document.getElementById('tia-routine');
+  banner.classList.remove('status-stable','status-unstable','status-pending');
+  if(flagged){
+    banner.classList.add('status-unstable');
+    banner.textContent = '⚡ EMERGENCY — same-day admission, not routine TIA clinic';
+    emerg.classList.add('show'); routine.classList.remove('show');
+  } else {
+    banner.classList.add('status-stable');
+    banner.textContent = '✓ ROUTINE URGENT — give aspirin now, specialist review <24h';
+    routine.classList.add('show'); emerg.classList.remove('show');
+  }
+}
+wireSymptomChecks('symptom-check','tia',updateTiaStatus);
+
+function giveAspirin(){
+  if(state.tia.aspirinGiven) return;
+  state.tia.aspirinGiven = true;
+  document.getElementById('aspirin-count').textContent = 'Given at '+nowClock();
+  document.getElementById('aspirin-btn').disabled = true;
+  logEvent('tia','Aspirin 300mg given');
+}
+function startReferralClock(){
+  const btn = document.getElementById('tia-referral-btn');
+  btn.disabled = true;
+  btn.textContent = 'Referral Clock Running…';
+  const block = document.getElementById('tia-referral-block');
+  const disp = document.getElementById('tia-referral-display');
+  block.classList.remove('stage-warn','stage-alarm');
+  logEvent('tia','Referral clock started — target specialist review within 24h');
+  runCountdown('tia','referral',86400,{
+    onTick:(r)=>{ disp.textContent = fmtHMS(r*1000); },
+    warnAt:14400,
+    onWarn:()=>{
+      block.classList.add('stage-warn');
+      warnBeep();
+      logEvent('tia','4 hours remaining in the 24h referral window');
+    },
+    onDue:()=>{
+      block.classList.remove('stage-warn');
+      block.classList.add('stage-alarm');
+      disp.textContent = '00:00:00';
+      alarmBeep();
+      logEvent('tia','24h REFERRAL WINDOW BREACHED — escalate now');
+    }
+  });
+}
+
+// ============================================================
+// 3. ISCHAEMIC STROKE TOOL
+// ============================================================
+function updateIschStatus(){
+  const flagged = anyChecked('symptom-check','isch');
+  const banner = document.getElementById('isch-status');
+  banner.classList.remove('status-stable','status-unstable');
+  if(flagged){
+    banner.classList.add('status-unstable');
+    banner.textContent = '⚠ Contraindication present — discuss with stroke consultant before proceeding';
+  } else {
+    banner.classList.add('status-stable');
+    banner.textContent = '✓ No absolute contraindications flagged — thrombolysis may proceed if in window';
+  }
+}
+wireSymptomChecks('symptom-check','isch',updateIschStatus);
+
+function updateIschHtransform(){
+  const flagged = anyChecked('symptom-check2','isch');
+  const banner = document.getElementById('isch-htransform-status');
+  banner.classList.remove('status-stable','status-unstable');
+  if(flagged){
+    banner.classList.add('status-unstable');
+    banner.textContent = '⚠ Possible haemorrhagic transformation — stop infusion, urgent CT now';
+  } else {
+    banner.classList.add('status-stable');
+    banner.textContent = 'No red flags for haemorrhagic transformation';
+  }
+}
+wireSymptomChecks('symptom-check2','isch',updateIschHtransform);
+
+function giveThrombolysis(){
+  if(state.isch.thrombGiven) return;
+  state.isch.thrombGiven = true;
+  document.getElementById('thromb-count').textContent = 'Given at '+nowClock();
+  document.getElementById('thromb-btn').disabled = true;
+  logEvent('isch','Thrombolysis (alteplase/tenecteplase) administered');
+}
+function toggleEvidencePanel(kind){
+  const panel = document.getElementById(kind+'-evidence-panel');
+  const btn = document.getElementById(kind+'-evidence-btn');
+  const showing = panel.classList.toggle('show');
+  const label = kind === 'thrombolysis' ? 'Thrombolysis' : 'Thrombectomy';
+  btn.textContent = (showing ? '\u25B2 Hide ' : '\u{1F4D8} ') + label + ' — Risks, Benefits & Evidence (NNT)';
+  if(showing) logEvent('isch','Viewed risks/benefits/evidence summary for '+kind);
+}
+const thrombectomyNotes = {
+  a: 'Confirmed proximal occlusion (ICA/MCA M1) on CTA; offer alongside IV thrombolysis if not contraindicated.',
+  b: 'Based on ASPECTS score and CT-perfusion / clinical-imaging mismatch showing salvageable tissue.',
+  c: 'Considered with confirmed large-vessel occlusion, given the high stakes of untreated basilar occlusion.'
+};
+function setThrombectomyPath(btn, key, msg){
+  document.querySelectorAll('#screen-isch .pathbtns .pathbtn').forEach(b=>{
+    b.classList.remove('active-a'); b.style.background=''; b.style.color='';
+  });
+  btn.style.background = 'var(--isch)'; btn.style.color = '#fff';
+  state.isch.thrombectomyPath = key;
+  document.getElementById('thrombectomy-note').textContent = thrombectomyNotes[key];
+  logEvent('isch', msg);
+}
+function giveThrombectomy(){
+  if(state.isch.thrombectomyGiven) return;
+  state.isch.thrombectomyGiven = true;
+  document.getElementById('thrombectomy-count').textContent = 'Performed at '+nowClock();
+  document.getElementById('thrombectomy-btn').disabled = true;
+  logEvent('isch','Mechanical thrombectomy performed');
+}
+
+const obsStages = [
+  {sec:900, label:'Next neuro-obs due (q15min ×2h)'},
+  {sec:1800, label:'Next neuro-obs due (q30min ×6h)'},
+  {sec:3600, label:'Next neuro-obs due (hourly to 24h)'}
+];
+function runObsStage(){
+  const idx = state.isch.obsStageIdx;
+  const stage = obsStages[idx];
+  const block = document.getElementById('obs-timer-block');
+  const disp = document.getElementById('obs-timer-display');
+  const cap = document.getElementById('obs-timer-caption');
+  block.classList.remove('stage-warn','stage-alarm');
+  cap.textContent = stage.label;
+  runCountdown('isch','obs',stage.sec,{
+    onTick:(r)=>{ disp.textContent = fmt(r*1000); },
+    warnAt:10,
+    onWarn:()=>{ block.classList.add('stage-warn'); warnBeep(); },
+    onDue:()=>{
+      block.classList.add('stage-alarm');
+      alarmBeep();
+      logEvent('isch','Neuro-obs due now ('+stage.label+')');
+      setTimeout(()=>{ block.classList.remove('stage-alarm'); runObsStage(); }, 1500);
+    }
+  });
+}
+function startObsCycle(){
+  const btn = document.getElementById('obs-btn');
+  btn.disabled = true;
+  btn.textContent = 'Obs Timer Running…';
+  logEvent('isch','Post-thrombolysis observation timer started');
+  runObsStage();
+}
+function advanceObsStage(){
+  if(state.isch.obsStageIdx < obsStages.length-1){
+    state.isch.obsStageIdx += 1;
+    logEvent('isch','Advanced to monitoring stage: '+obsStages[state.isch.obsStageIdx].label);
+    if(state.isch.obsInterval) runObsStage();
+  }
+}
+
+// ============================================================
+// 4. HAEMORRHAGIC STROKE TOOL
+// ============================================================
+function updateHaemStatus(){
+  const flagged = anyChecked('symptom-check','haem');
+  const banner = document.getElementById('haem-status');
+  banner.classList.remove('status-stable','status-unstable');
+  if(flagged){
+    banner.classList.add('status-unstable');
+    banner.textContent = '⚠ Neurosurgical referral criteria met — discuss now';
+  } else {
+    banner.classList.add('status-stable');
+    banner.textContent = 'No neurosurgical referral criteria flagged — continue medical management';
+  }
+}
+wireSymptomChecks('symptom-check','haem',updateHaemStatus);
+
+function startBpClock(){
+  const btn = document.getElementById('bp-btn');
+  btn.disabled = true;
+  btn.textContent = 'BP Clock Running…';
+  const block = document.getElementById('bp-timer-block');
+  const disp = document.getElementById('bp-timer-display');
+  block.classList.remove('stage-warn','stage-alarm');
+  logEvent('haem','BP target clock started — SBP <140 within 1 hour');
+  runCountdown('haem','bp',3600,{
+    onTick:(r)=>{ disp.textContent = fmt(r*1000); },
+    warnAt:600,
+    onWarn:()=>{
+      block.classList.add('stage-warn');
+      warnBeep();
+      logEvent('haem','10 minutes remaining to reach SBP <140 target');
+    },
+    onDue:()=>{
+      block.classList.remove('stage-warn');
+      block.classList.add('stage-alarm');
+      disp.textContent = '00:00';
+      alarmBeep();
+      logEvent('haem','1-hour BP target window elapsed — reassess control');
+    }
+  });
+}
+
+const reversalNotes = {
+  vka: 'Warfarin/VKA (INR ≥2.0): 4-factor PCC preferred over FFP for faster INR correction with less volume. Give IV vitamin K alongside to prevent INR rebound.',
+  dabi: 'Dabigatran (direct thrombin inhibitor): Idarucizumab 5g IV. Consider haemodialysis if idarucizumab unavailable and renal function impaired.',
+  xa: 'Rivaroxaban/Apixaban/Edoxaban (factor Xa inhibitors): Andexanet alfa where available; 4-factor PCC as an alternative if andexanet is not accessible.'
+};
+function setReversalPath(btn, key, msg){
+  document.querySelectorAll('#screen-haem .pathbtns .pathbtn').forEach(b=>{
+    b.style.background=''; b.style.color='';
+  });
+  btn.style.background = 'var(--haem)'; btn.style.color = '#fff';
+  state.haem.reversalPath = key;
+  document.getElementById('reversal-note').textContent = reversalNotes[key];
+  logEvent('haem', msg);
+}
+function giveReversal(){
+  if(state.haem.reversalGiven) return;
+  state.haem.reversalGiven = true;
+  document.getElementById('reversal-count').textContent = 'Given at '+nowClock();
+  document.getElementById('reversal-btn').disabled = true;
+  logEvent('haem','Reversal agent administered'+(state.haem.reversalPath ? ' ('+state.haem.reversalPath+' pathway)' : ''));
+}
+
+// ============================================================
+// NIHSS CALCULATOR (Reference Hub)
+// ============================================================
+const nihssItems = [
+  { id:'1a', title:'1a. Level of Consciousness', desc:'Score 3 only if no movement (other than reflex) to noxious stimulation.',
+    opts:[[0,'0 Alert'],[1,'1 Not alert, arousable by minor stimulation'],[2,'2 Not alert, requires repeated/painful stimulation'],[3,'3 Reflex/unresponsive']] },
+  { id:'1b', title:'1b. LOC Questions (month, age)', desc:'Answer must be exactly correct — no partial credit.',
+    opts:[[0,'0 Both correct'],[1,'1 One correct'],[2,'2 Neither correct']] },
+  { id:'1c', title:'1c. LOC Commands (open/close eyes, grip/release hand)', desc:'Only the first attempt is scored.',
+    opts:[[0,'0 Both tasks'],[1,'1 One task'],[2,'2 Neither task']] },
+  { id:'2', title:'2. Best Gaze', desc:'Only horizontal eye movements tested.',
+    opts:[[0,'0 Normal'],[1,'1 Partial gaze palsy'],[2,'2 Forced deviation']] },
+  { id:'3', title:'3. Visual Fields', desc:'Test by confrontation, upper & lower quadrants.',
+    opts:[[0,'0 No visual loss'],[1,'1 Partial hemianopia'],[2,'2 Complete hemianopia'],[3,'3 Bilateral hemianopia']] },
+  { id:'4', title:'4. Facial Palsy', desc:'Ask patient to show teeth, raise eyebrows, close eyes.',
+    opts:[[0,'0 Normal'],[1,'1 Minor paralysis'],[2,'2 Partial paralysis'],[3,'3 Complete paralysis']] },
+  { id:'5a', title:'5a. Motor Arm — Left', desc:'Extend 90°(sitting)/45°(supine); drift if falls before 10 sec.',
+    opts:[[0,'0 No drift'],[1,'1 Drift'],[2,'2 Some effort vs gravity'],[3,'3 No effort vs gravity'],[4,'4 No movement'],['UN','UN Amputation/fusion']] },
+  { id:'5b', title:'5b. Motor Arm — Right', desc:'Extend 90°(sitting)/45°(supine); drift if falls before 10 sec.',
+    opts:[[0,'0 No drift'],[1,'1 Drift'],[2,'2 Some effort vs gravity'],[3,'3 No effort vs gravity'],[4,'4 No movement'],['UN','UN Amputation/fusion']] },
+  { id:'6a', title:'6a. Motor Leg — Left', desc:'Hold at 30° supine; drift if falls before 5 sec.',
+    opts:[[0,'0 No drift'],[1,'1 Drift'],[2,'2 Some effort vs gravity'],[3,'3 No effort vs gravity'],[4,'4 No movement'],['UN','UN Amputation/fusion']] },
+  { id:'6b', title:'6b. Motor Leg — Right', desc:'Hold at 30° supine; drift if falls before 5 sec.',
+    opts:[[0,'0 No drift'],[1,'1 Drift'],[2,'2 Some effort vs gravity'],[3,'3 No effort vs gravity'],[4,'4 No movement'],['UN','UN Amputation/fusion']] },
+  { id:'7', title:'7. Limb Ataxia', desc:'Finger-nose-finger & heel-shin; score only if out of proportion to weakness.',
+    opts:[[0,'0 Absent'],[1,'1 Present in one limb'],[2,'2 Present in two limbs'],['UN','UN Amputation/fusion']] },
+  { id:'8', title:'8. Sensory', desc:'Pinprick, as many body areas as needed for hemisensory loss.',
+    opts:[[0,'0 Normal'],[1,'1 Mild–moderate loss'],[2,'2 Severe–total loss']] },
+  { id:'9', title:'9. Best Language', desc:'Describe picture, name items, read sentences.',
+    opts:[[0,'0 No aphasia'],[1,'1 Mild–moderate aphasia'],[2,'2 Severe aphasia'],[3,'3 Mute/global aphasia']] },
+  { id:'10', title:'10. Dysarthria', desc:'Ask patient to read/repeat words from list.',
+    opts:[[0,'0 Normal'],[1,'1 Mild–moderate'],[2,'2 Severe/unintelligible'],['UN','UN Intubated']] },
+  { id:'11', title:'11. Extinction & Inattention', desc:'Double simultaneous stimulation; never untestable.',
+    opts:[[0,'0 No abnormality'],[1,'1 One sensory modality'],[2,'2 Profound / >1 modality']] }
+];
+const nihssScores = {};
+function buildNihssItems(){
+  const container = document.getElementById('nihss-items');
+  container.innerHTML = nihssItems.map(item=>{
+    const btns = item.opts.map(([val,label])=>{
+      const valArg = (typeof val === 'string') ? "'"+val+"'" : val;
+      return `<button class="score-btn" data-item="${item.id}" data-val="${val}" onclick="pickNihss('${item.id}',${valArg},this)">${label.split(' ')[0]}</button>`;
+    }).join('');
+    const optLabels = item.opts.map(([val,label])=>`<div>${label}</div>`).join('');
+    return `<div class="nihss-item">
+      <div class="nihss-item-title">${item.title}</div>
+      <div class="nihss-item-desc">${item.desc}</div>
+      <div class="score-row" id="score-row-${item.id}">${btns}</div>
+    </div>`;
+  }).join('');
+}
+function pickNihss(itemId, val, btn){
+  nihssScores[itemId] = val;
+  document.querySelectorAll('#score-row-'+itemId+' .score-btn').forEach(b=>b.classList.remove('picked'));
+  btn.classList.add('picked');
+  updateNihssTotal();
+  syncNihssToTools();
+}
+function nihssBandLabel(total){
+  if(total===0) return { label:'No stroke symptoms', bg:'rgba(255,255,255,0.15)' };
+  if(total<=4) return { label:'Minor stroke', bg:'#0B7285' };
+  if(total<=15) return { label:'Moderate stroke', bg:'#B9720A' };
+  if(total<=20) return { label:'Moderate–severe stroke', bg:'#C06A2C' };
+  return { label:'Severe stroke', bg:'#C0392B' };
+}
+function nihssCurrentTotal(){
+  let total = 0;
+  Object.values(nihssScores).forEach(v=>{ if(v!=='UN') total += Number(v); });
+  return total;
+}
+function updateNihssTotal(){
+  const total = nihssCurrentTotal();
+  document.getElementById('nihss-total').textContent = total;
+  const band = document.getElementById('nihss-band');
+  const { label, bg } = nihssBandLabel(total);
+  band.textContent = label;
+  band.style.background = bg;
+  band.style.color = '#fff';
+}
+function syncNihssToTools(){
+  const hasScores = Object.keys(nihssScores).length > 0;
+  if(!hasScores) return;
+  const total = nihssCurrentTotal();
+  const { label } = nihssBandLabel(total);
+  const text = 'NIHSS '+total+' — '+label+' (from calculator, '+nowClock()+')';
+  ['assess','isch'].forEach(key=>{
+    const disp = document.getElementById('nihss-result-'+key);
+    if(disp){ disp.textContent = text; disp.classList.add('show'); }
+    const cb = document.getElementById('nihss-doc-'+key);
+    if(cb && !cb.checked){
+      cb.checked = true;
+      const row = cb.closest('.check-row');
+      if(row) row.classList.add('done');
+      logEvent(key, 'NIHSS documented via calculator: score '+total+' ('+label+')');
+    }
+  });
+}
+function resetNihss(){
+  Object.keys(nihssScores).forEach(k=>delete nihssScores[k]);
+  document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('picked'));
+  updateNihssTotal();
+  ['assess','isch'].forEach(key=>{
+    const disp = document.getElementById('nihss-result-'+key);
+    if(disp){ disp.textContent = ''; disp.classList.remove('show'); }
+  });
+}
+buildNihssItems();
+
+// ============================================================
+// BAMFORD CLASSIFIER (Reference Hub)
+// ============================================================
+function updateBamford(){
+  const motor = document.getElementById('bam-motor').checked;
+  const hemianopia = document.getElementById('bam-hemianopia').checked;
+  const cortical = document.getElementById('bam-cortical').checked;
+  const brainstem = document.getElementById('bam-brainstem').checked;
+  const lacunar = document.getElementById('bam-lacunar').checked;
+  const resultBox = document.getElementById('bamford-result');
+  const codeEl = document.getElementById('bamford-code');
+  const nameEl = document.getElementById('bamford-name');
+  const taciCount = [motor,hemianopia,cortical].filter(Boolean).length;
+
+  let code='—', name='Check features above', color='var(--muted)';
+  if(lacunar && !cortical && !hemianopia){
+    code='LACI'; name='Lacunar Infarct — small-vessel disease'; color='var(--isch)';
+  } else if(taciCount===3){
+    code='TACI'; name='Total Anterior Circulation Infarct'; color='var(--haem)';
+  } else if(brainstem && !cortical){
+    code='POCI'; name='Posterior Circulation Infarct'; color='var(--tia)';
+  } else if(taciCount===2 || (cortical && taciCount>=1)){
+    code='PACI'; name='Partial Anterior Circulation Infarct'; color='#5B6478';
+  } else if(taciCount===1 && cortical){
+    code='PACI'; name='Partial Anterior Circulation Infarct (isolated higher cortical dysfunction)'; color='#5B6478';
+  }
+  codeEl.textContent = code;
+  nameEl.textContent = name;
+  resultBox.style.background = color;
+}
+document.querySelectorAll('.bamford-check').forEach(cb=>{
+  cb.onchange = function(){
+    const row = this.closest('.check-row');
+    if(this.checked){ row.classList.add('done'); } else { row.classList.remove('done'); }
+    updateBamford();
+  };
+});
+
+// ============================================================
+// TRAINING SCENARIOS
+// ============================================================
+const toolNames = { assess:'Rapid Assessment', tia:'TIA Pathway', isch:'Ischaemic Stroke', haem:'Haemorrhagic Stroke' };
+
+const scenarios = [
+  { id:1, tag:'Ischaemic Stroke', color:'isch', title:'Sudden right-sided weakness & global aphasia',
+    meta:'68-year-old man &middot; found by wife &middot; last seen well 50 minutes ago',
+    teaser:'Dense right hemiparesis, unable to speak, last seen well under an hour ago.',
+    vignette:[
+      'Found slumped in a kitchen chair by his wife, unable to speak and with obvious right-sided weakness.',
+      'Last seen completely normal 50 minutes ago.',
+      'PMH: hypertension, atrial fibrillation (not currently anticoagulated), type 2 diabetes.'
+    ],
+    exam:[
+      'Vitals: BP 178/94, HR 110 irregularly irregular, SpO&#8322; 96% on air, capillary glucose 6.2 mmol/L, afebrile.',
+      'Consciousness: alert, eyes open spontaneously. Unable to answer either orientation question (month/age) or follow either one-step command (open/close eyes; grip/release hand) because of his aphasia.',
+      'Gaze: sustained conjugate deviation to the left, not overcome by the oculocephalic manoeuvre. Visual fields: complete right homonymous hemianopia on confrontation testing.',
+      'Face: right lower-face weakness with a flattened nasolabial fold; forehead wrinkling preserved bilaterally.',
+      'Limbs: left arm and leg move normally with no drift. Right arm and leg show no movement at all against gravity or the bed.',
+      'Coordination: not formally testable given the dense right-sided plegia.',
+      'Sensation: reduced response to pinprick on the right face, arm and leg compared with the left.',
+      'Speech/language: no meaningful speech output, cannot name objects or follow commands; occasional unintelligible word fragments.',
+      'Attention: does not spontaneously use or orient to his right arm, even when it is touched.'
+    ],
+    recognition:'FAST positive on all four elements; BE-FAST also positive for eyes (hemianopia).',
+    scoring:'ROSIER: +1 face, +1 arm, +1 leg, +1 speech, +1 visual field = <b>5</b> (strongly suggests stroke). NIHSS: consciousness 0, orientation questions 2, commands 2, gaze 2, visual fields 2, face 2, arm L/R 0/4, leg L/R 0/4, ataxia 0, sensory 1, language 3, dysarthria 2, extinction 2 = <b>26</b> (severe stroke).',
+    differentiation:'Sudden, maximal-at-onset focal deficit fitting a single vascular territory, with strong vascular risk factors (untreated AF) and a normal glucose — clinical picture is not that of a mimic.',
+    bamford:'Bamford: <b>TACI</b> — all three of motor/sensory deficit, homonymous hemianopia and higher cortical dysfunction (aphasia) are present.',
+    pathway:'CT excludes haemorrhage &rarr; routed to the <b>Ischaemic Stroke</b> pathway. Within the 4.5h window (50 min elapsed) &rarr; thrombolysis-eligible. CTA shows an M1 occlusion &rarr; thrombectomy also indicated (0&ndash;6h anterior LVO pathway).',
+    actions:['ABCDE + glucose first','Urgent non-contrast CT + CTA','NIHSS documented before treatment','Thrombolysis given if no contraindication','Thrombectomy team activated in parallel — don\'t wait for one before starting the other','Admit to stroke unit for monitoring'],
+    teaching:'Untreated AF is one of the strongest modifiable risk factors for cardioembolic stroke. Large-vessel TACI patients benefit most from combined thrombolysis + thrombectomy — treat as parallel, not sequential, pathways.',
+    practiceTool:'isch' },
+
+  { id:9, tag:'Mimic', color:'train', title:'Confusion & right-sided weakness after skipping lunch',
+    meta:'54-year-old man &middot; type 1 diabetes &middot; found by colleagues',
+    teaser:'Confused with right facial droop and arm weakness after missing a meal — check the glucose first.',
+    vignette:[
+      'Found confused with right-sided weakness and slurred speech by colleagues, having skipped lunch.',
+      'PMH: type 1 diabetes.'
+    ],
+    exam:[
+      'Vitals: BP 132/78, HR 92, SpO&#8322; 98% on air, temperature 36.6&deg;C, capillary glucose 1.8 mmol/L.',
+      'Consciousness: drowsy, keeps drifting off but rousable with voice. Gets the month wrong and cannot state his age. Follows the grip command but not the eye-opening command reliably.',
+      'Gaze and visual fields: full and normal.',
+      'Face: mild right lower facial asymmetry.',
+      'Limbs: right arm drifts down before 10 seconds; right leg shows mild drift. Left arm and leg normal.',
+      'Coordination: none elicited. Sensation: intact, though responses are slow.',
+      'Speech: slurred with mild word-finding hesitancy but largely comprehensible.'
+    ],
+    recognition:'FAST would appear positive here (face, arm, speech) — which is exactly why glucose must be checked before FAST/ROSIER/NIHSS are acted upon.',
+    scoring:'Before treatment: ROSIER = +1 face, +1 arm, +1 leg, +1 speech = <b>4</b> (would be read as "stroke likely"); NIHSS: consciousness 1, orientation 2, commands 1, face 1, arm (right) 1, leg (right) 1, language 1, dysarthria 1, all else 0 = <b>9</b> (moderate). Both are entirely explained by the glucose of 1.8 mmol/L and fall to <b>0</b> within 15 minutes of correction — the real diagnostic test here.',
+    differentiation:'Focal neurological signs from hypoglycaemia are clinically indistinguishable from stroke without checking glucose. After correction (IV dextrose/glucagon), the deficit resolves completely within 15 minutes.',
+    pathway:'This is a <b>stroke mimic</b> — hypoglycaemia. Flag it in Rapid Assessment, treat immediately, and reassess neurology after correction before deciding whether any residual deficit needs imaging.',
+    actions:['Capillary glucose before FAST/ROSIER/NIHSS in every suspected stroke','Treat hypoglycaemia immediately (IV dextrose / IM glucagon)','Re-examine after correction — full resolution supports the mimic diagnosis','If any deficit persists after correction, proceed to full stroke work-up regardless'],
+    teaching:'Hypoglycaemia is the single most important mimic to exclude before anything else — it is fast, cheap to check, and immediately treatable, and untreated it can itself cause lasting harm.',
+    practiceTool:'assess' },
+
+  { id:5, tag:'TIA', color:'tia', title:'Third transient episode this week',
+    meta:'63-year-old woman &middot; now asymptomatic &middot; previous TIA 2 years ago',
+    teaser:'Third short-lived episode of hand weakness and word-finding difficulty in a week — now fully resolved.',
+    vignette:[
+      'Third episode this week of transient right hand weakness and word-finding difficulty, each lasting 10&ndash;15 minutes and fully resolving.',
+      'Currently completely asymptomatic.',
+      'PMH: hypertension, previous TIA 2 years ago, already on aspirin.'
+    ],
+    exam:[
+      'Vitals: BP 148/86, HR 78 regular, SpO&#8322; 98% on air, afebrile, capillary glucose 5.4 mmol/L.',
+      'Fully alert and orientated, follows commands normally. Gaze and visual fields full. Face symmetrical.',
+      'All four limbs full power with no drift. No ataxia. Sensation intact throughout.',
+      'Speech fluent and clear, no dysarthria. No neglect or extinction.'
+    ],
+    recognition:'By definition, no findings on this exam — the history is everything here.',
+    scoring:'Currently: ROSIER 0, NIHSS 0 — the exam is entirely normal because the episode has already resolved. Neither score reflects risk here; the history (crescendo pattern) is what drives the pathway.',
+    differentiation:'Stereotyped, recurrent, fully-resolving focal episodes with vascular risk factors — a vascular pattern rather than a mimic.',
+    pathway:'Symptoms resolved, so the case starts in the <b>TIA</b> pathway. Checking the red-flag list: <b>crescendo TIAs (&ge;2 in a week)</b> is present &rarr; this triggers the <b>Emergency</b> pathway, not the routine urgent (&lt;24h) referral.',
+    actions:['Treat as an emergency — same-day admission, not a routine TIA clinic slot','Arrange urgent CT/MRI brain','Request immediate senior/stroke team review','Still start aspirin 300mg unless contraindicated'],
+    teaching:'Crescendo or recurrent TIAs suggest an unstable plaque or critical stenosis at imminent risk of a major stroke. These patients need admission, not an outpatient pathway, even though every episode has fully resolved.',
+    practiceTool:'tia' },
+
+  { id:7, tag:'Haemorrhagic Stroke', color:'haem', title:'Sudden headache & weakness on apixaban',
+    meta:'77-year-old woman &middot; on apixaban for AF &middot; vomited en route',
+    teaser:'Severe headache and left-sided weakness on a factor Xa inhibitor, with vomiting and a very high BP.',
+    vignette:[
+      'Sudden severe headache and left-sided weakness while watching TV. Vomited once on the way to hospital.',
+      'PMH: atrial fibrillation on apixaban.'
+    ],
+    exam:[
+      'Vitals: BP 210/110, HR 88 regular, SpO&#8322; 95% on air, temperature 36.9&deg;C, capillary glucose 7.1 mmol/L.',
+      'Consciousness: drowsy, opens eyes to voice (GCS 12). Unable to answer either orientation question; follows only one of the two commands, and inconsistently.',
+      'Gaze: partial preference to the right that can be overcome. Visual fields: left homonymous hemianopia suspected on blink-to-threat testing.',
+      'Face: left lower facial droop.',
+      'Limbs: left arm and leg show no movement at all. Right arm and leg normal.',
+      'Coordination: not testable given the dense left-sided plegia. Sensation: reduced response to pinprick on the left.',
+      'Speech: moderately dysarthric, understandable only with effort; mildly dysfluent when prompted. Some inattention to left-sided stimuli on double simultaneous testing.'
+    ],
+    recognition:'Clinical clues favouring haemorrhage: severe headache at onset, vomiting, reduced consciousness, markedly elevated BP, and anticoagulant use.',
+    scoring:'ROSIER: +1 face, +1 arm, +1 leg, +1 speech, +1 visual field = <b>5</b>. NIHSS: consciousness 1, orientation 2, commands 1, gaze 1, visual fields 2, face 2, arm L/R 4/0, leg L/R 4/0, ataxia 0, sensory 1, language 1, dysarthria 1, extinction 1 = <b>21</b> (severe). No sign here reliably distinguishes ICH from ischaemic stroke — CT is still mandatory.',
+    differentiation:'The combination of severe headache, vomiting, reduced GCS and very high BP should raise suspicion of haemorrhage before imaging even though ischaemic stroke remains possible.',
+    pathway:'CT confirms a moderate-sized lobar intracerebral haemorrhage &rarr; <b>Haemorrhagic Stroke</b> pathway. Apixaban is a <b>factor Xa inhibitor</b> &rarr; reversal with andexanet alfa where available (4-factor PCC as an alternative).',
+    actions:['Discontinue apixaban immediately','Start the BP target clock — SBP &lt;140 mmHg within 1 hour, avoiding overcorrection below 130','Send coagulation screen and confirm last dose time/renal function','Give reversal agent as soon as possible, in parallel with BP control — not after it','Glucose and temperature control as part of the same bundle'],
+    teaching:'Anticoagulant-associated ICH carries a higher risk of haematoma expansion and worse outcomes. Reversal should start as fast as possible, delivered alongside — not sequentially after — blood pressure control.',
+    practiceTool:'haem' },
+
+  { id:2, tag:'Ischaemic Stroke', color:'isch', title:'Wake-up stroke with unknown onset time',
+    meta:'74-year-old woman &middot; symptoms noticed on waking &middot; last seen well ~8 hours ago',
+    teaser:'Woke with facial droop and arm weakness — last known well was the night before.',
+    vignette:[
+      'Woke at 07:00 with left facial droop and left arm weakness. Last seen completely well at 23:00 the previous night (~8 hours ago).',
+      'No similar episodes previously.',
+      'PMH: hypertension, hyperlipidaemia.'
+    ],
+    exam:[
+      'Vitals: BP 162/88, HR 76 regular, SpO&#8322; 97% on air, afebrile, capillary glucose 5.8 mmol/L.',
+      'Alert and orientated, follows commands normally. Gaze and visual fields full.',
+      'Face: mild left lower facial droop.',
+      'Limbs: left arm drifts down before 10 seconds. Left leg, right arm and right leg all normal with no drift.',
+      'Coordination and sensation normal.',
+      'Speech: mild slurring, fluent with only a brief word-finding pause.'
+    ],
+    recognition:'FAST positive (face, arm).',
+    scoring:'ROSIER: +1 face, +1 arm, +1 speech = <b>3</b>. NIHSS: face 1, arm (left) 1, language 1, dysarthria 1, all else 0 = <b>4</b> (minor stroke) — a reminder that even a "minor" NIHSS can still be thrombolysis-eligible if the deficit is disabling.',
+    differentiation:'Sudden focal deficit on waking, vascular risk factors, normal glucose — favours stroke over a mimic, but exact onset time is genuinely unknown.',
+    bamford:'Insufficient cortical/visual-field findings for TACI/PACI here — most consistent with a partial anterior circulation pattern; imaging will clarify territory.',
+    pathway:'CT excludes haemorrhage &rarr; <b>Ischaemic Stroke</b> pathway. Clock time since last-known-well is &gt;4.5h, but this is a "wake-up stroke" — MRI DWI-FLAIR mismatch (or CT perfusion) can identify salvageable tissue and support thrombolysis despite the unclear onset time.',
+    actions:['Start the onset clock anyway — it will show the window has passed, which is exactly the teaching point here','Request urgent MRI DWI-FLAIR (or CT perfusion) rather than assuming ineligibility','Document NIHSS','Discuss mismatch-based thrombolysis eligibility with the stroke team'],
+    teaching:'Wake-up and unknown-onset strokes are <b>not</b> automatically excluded from thrombolysis. Imaging-based selection (DWI-FLAIR or perfusion mismatch) can identify patients who still benefit — the WAKE-UP trial showed a NNT of ~9 for favourable outcome in this group.',
+    practiceTool:'isch' },
+
+  { id:10, tag:'Mimic', color:'train', title:'Witnessed seizure, then improving arm weakness',
+    meta:'45-year-old woman &middot; witnessed tonic-clonic seizure &middot; heavy alcohol use',
+    teaser:'A witnessed seizure followed by post-ictal, gradually improving one-sided weakness.',
+    vignette:[
+      'Witnessed by her husband to have a 2-minute generalised tonic-clonic seizure. Now drowsy with left arm weakness that is gradually improving over the following hour.',
+      'PMH: no prior seizures; heavy alcohol use.'
+    ],
+    exam:[
+      'Vitals: BP 138/84, HR 96, SpO&#8322; 97% on air, temperature 37.0&deg;C, capillary glucose 5.6 mmol/L.',
+      'Consciousness: drowsy post-ictally but rousable; once roused, answers both orientation questions correctly and follows both commands, if slowly.',
+      'Gaze and visual fields normal. Face: mild left lower facial weakness.',
+      'Limbs: left arm can be lifted but drifts down with some effort against gravity. Left leg, right arm and right leg all normal.',
+      'Coordination and sensation normal.',
+      'Speech: mildly slurred, post-ictal; tongue laceration noted.'
+    ],
+    recognition:'Witnessed seizure with tongue laceration and a gradually resolving unilateral weakness is the classic pattern of Todd\'s paresis.',
+    scoring:'ROSIER: &minus;1 for the witnessed seizure, then +1 face, +1 arm, +1 speech = net <b>2</b>. NIHSS: consciousness 1, face 1, arm (left) 2, dysarthria 1, all else 0 = <b>5</b> (moderate) — a reminder that a mimic can still generate a non-trivial score on both tools; the seizure history and expected improvement over the next hour are what really separate this from stroke.',
+    differentiation:'Improvement over the following hour (rather than persistence or worsening) supports Todd\'s paresis, but a first-ever seizure in an adult always warrants imaging to exclude an underlying structural lesion, including stroke itself.',
+    pathway:'Most consistent with a <b>stroke mimic</b> — post-ictal Todd\'s paresis — but this should still be flagged and CT considered given it is a first seizure with risk factors (alcohol use).',
+    actions:['Screen for mimics in Rapid Assessment — witnessed seizure box','Do not dismiss entirely: image to exclude a structural cause for a first seizure','Re-examine over the next hour — ongoing improvement supports the mimic diagnosis','Consider alcohol withdrawal / metabolic causes given the history'],
+    teaching:'Todd\'s paresis is the most common stroke mimic (accounting for up to a fifth of "suspected strokes"). It typically resolves over hours — unlike stroke, which does not improve so quickly — but always image if there is any diagnostic doubt, especially with a first-ever seizure.',
+    practiceTool:'assess' },
+  { id:8, tag:'Haemorrhagic Stroke', color:'haem', title:'Occipital headache, vomiting & ataxia',
+    meta:'66-year-old man &middot; poorly controlled hypertension &middot; rapidly deteriorating',
+    teaser:'Sudden severe occipital headache with vomiting and inability to walk — deteriorating fast.',
+    vignette:[
+      'Sudden severe occipital headache, vomiting, and inability to walk (ataxia), rapidly becoming drowsy.',
+      'PMH: poorly controlled hypertension.'
+    ],
+    exam:[
+      'Vitals: BP 200/115, HR 58, SpO&#8322; 94% on air, temperature 37.2&deg;C, capillary glucose 6.9 mmol/L.',
+      'Consciousness: responds only to repeated or painful stimulation (GCS 10). Unable to answer orientation questions or follow commands reliably.',
+      'Gaze: unable to look towards the left voluntarily. Visual fields appear full on blink-to-threat testing.',
+      'Face: no clear facial asymmetry.',
+      'Limbs: full power in all four limbs with no drift, but marked dysmetria on finger-nose testing bilaterally, out of proportion to any weakness.',
+      'Sensation intact where testable.',
+      'Speech: severely dysarthric, largely unintelligible, though words are appropriate when audible.'
+    ],
+    recognition:'Rapidly progressive course with early reduced consciousness and markedly elevated BP — high suspicion for haemorrhage, specifically posterior fossa.',
+    scoring:'ROSIER: only +1 for speech (dysarthria) = <b>1</b> — deceptively low, because ROSIER does not score ataxia or balance at all. NIHSS: consciousness 2, orientation 2, commands 2, gaze 1, ataxia 2, dysarthria 2, all else 0 = <b>11</b> (moderate) — again lower than the clinical picture suggests, because limb power is preserved in a purely cerebellar bleed. Neither score captures how dangerous this is; the GCS trend and imaging do.',
+    differentiation:'The combination of occipital headache, vomiting, ataxia and rapid deterioration is a classic cerebellar haemorrhage picture rather than a supratentorial event or a mimic.',
+    pathway:'CT shows a 3.5cm cerebellar haemorrhage with early hydrocephalus &rarr; <b>Haemorrhagic Stroke</b> pathway. Checking neurosurgical referral criteria: cerebellar haemorrhage &gt;3cm + hydrocephalus + deteriorating GCS are all present &rarr; urgent neurosurgical discussion for possible evacuation/EVD.',
+    actions:['Flag all applicable neurosurgical referral criteria in the app — don\'t wait for all of them to appear before calling','Start the BP target clock','Send coagulation screen even without known anticoagulant use','Call neurosurgery early — this is time-critical'],
+    teaching:'Cerebellar haemorrhage can deteriorate rapidly due to brainstem compression or hydrocephalus in the confined posterior fossa. Unlike most supratentorial bleeds, this is a true surgical emergency with a low threshold for urgent neurosurgical referral.',
+    practiceTool:'haem' },
+
+  { id:6, tag:'TIA', color:'tia', title:'Single resolved episode of visual loss',
+    meta:'58-year-old man &middot; single episode yesterday &middot; no recurrence',
+    teaser:'One episode of transient visual field loss lasting 20 minutes, fully resolved, no red flags.',
+    vignette:[
+      'Single episode of transient left visual field loss lasting about 20 minutes while at work yesterday. Fully resolved, no recurrence since.',
+      'PMH: hyperlipidaemia, ex-smoker.'
+    ],
+    exam:[
+      'Vitals: BP 142/84, HR 74 regular, SpO&#8322; 98% on air, afebrile, capillary glucose 5.2 mmol/L.',
+      'Fully alert and orientated, follows commands normally. Gaze and visual fields full. Face symmetrical.',
+      'All four limbs full power with no drift. No ataxia. Sensation intact throughout.',
+      'Speech fluent and clear, no dysarthria. No neglect or extinction.'
+    ],
+    recognition:'History-based diagnosis; exam is normal.',
+    scoring:'Currently: ROSIER 0, NIHSS 0 — again, both are normal because the episode has fully resolved. This does not downgrade the urgency of referral.',
+    differentiation:'Sudden, well-defined, fully-resolving visual field loss with vascular risk factors — fits TIA rather than a mimic (e.g. no headache, no aura march, no LOC).',
+    pathway:'No red flags present &rarr; <b>Routine urgent</b> pathway: give aspirin 300mg now (onset was within 48h) and refer for specialist assessment within 24h.',
+    actions:['Aspirin 300mg immediately','Start the 24h referral clock','Arrange ECG/ambulatory monitoring for AF, MRI/CT brain, carotid imaging if appropriate','Start secondary prevention discussion (statin, BP plan) at this visit'],
+    teaching:'Even a single, fully-resolved TIA needs the same urgency as recurrent ones under current NICE guidance — ABCD2 and similar risk scores are no longer used to decide who gets seen urgently; every suspected TIA is referred within 24 hours.',
+    practiceTool:'tia' },
+
+  { id:3, tag:'Ischaemic Stroke', color:'isch', title:'Sudden vertigo, diplopia & drowsiness',
+    meta:'59-year-old man &middot; found by neighbour &middot; last seen well ~2 hours ago',
+    teaser:'Vertigo and double vision while gardening, then became drowsy — a posterior circulation trap.',
+    vignette:[
+      'Sudden vertigo and double vision while gardening, then found drowsy by a neighbour roughly 2 hours after last being seen well.',
+      'PMH: smoker, hypertension.'
+    ],
+    exam:[
+      'Vitals: BP 150/90, HR 68 regular, SpO&#8322; 95% on air, temperature 36.8&deg;C, capillary glucose 6.0 mmol/L.',
+      'Consciousness: drowsy, rousable with voice. Answers one of the two orientation questions correctly and follows one of the two commands.',
+      'Gaze: horizontal gaze palsy, unable to look to the right voluntarily. Visual fields full to confrontation.',
+      'Face: mild right facial weakness.',
+      'Limbs: left arm shows mild drift; right leg shows mild drift (a "crossed" pattern). Right arm and left leg normal.',
+      'Coordination: dysmetria in the right arm and leg, present in two limbs. Sensation: mildly reduced pinprick on the left face and right body (a crossed sensory pattern).',
+      'Speech: severely dysarthric, largely unintelligible; language content otherwise appropriate once audible.'
+    ],
+    recognition:'Classic FAST is equivocal — no clear one-sided facial droop or arm weakness. BE-FAST catches it: Balance (ataxia) and Eyes (diplopia) are both positive.',
+    scoring:'ROSIER: +1 face, +1 arm, +1 leg, +1 speech = <b>4</b> — deceptively modest, because ROSIER has no item for ataxia or balance, exactly the features BE-FAST is designed to catch. NIHSS: consciousness 1, orientation 1, commands 1, gaze 1, face 1, arm L/R 1/0, leg L/R 0/1, ataxia 2, sensory 1, dysarthria 2 = <b>12</b> (moderate) — meaningfully higher than the ROSIER alone would suggest.',
+    differentiation:'Sudden onset, vascular risk factors, no glucose or seizure history to suggest a mimic — but the presentation is easy to misattribute to labyrinthitis or a "funny turn" if BE-FAST isn\'t used.',
+    bamford:'Bamford: <b>POCI</b> — brainstem/cerebellar signs (vertigo, diplopia, dysarthria, ataxia, crossed signs).',
+    pathway:'Initial CT may look deceptively normal (posterior fossa is harder to image well) &rarr; CTA is needed to confirm a basilar occlusion. Thrombectomy for posterior circulation can be considered up to 12h given the very high stakes of an untreated basilar occlusion.',
+    actions:['Do not be reassured by a modest ROSIER — it has no ataxia/balance item, so it under-represents posterior circulation strokes','Examine specifically for gaze, ataxia and crossed signs','Request urgent CTA even if non-contrast CT looks unremarkable','Contact the thrombectomy centre early — posterior circulation strokes are frequently under-referred'],
+    teaching:'Posterior circulation strokes are among the most commonly missed. Reduced consciousness plus vertigo, diplopia and ataxia should trigger urgent basilar-occlusion work-up even when the ROSIER score looks reassuring — untreated basilar occlusion carries very high mortality.',
+    practiceTool:'isch' },
+
+  { id:4, tag:'Ischaemic Stroke', color:'isch', title:'Isolated arm & leg weakness, no facial or speech signs',
+    meta:'71-year-old man &middot; noticed on waking &middot; poorly controlled hypertension',
+    teaser:'Pure motor weakness with no facial, speech, visual or sensory involvement.',
+    vignette:[
+      'Noticed right arm and leg weakness on waking. Face, speech and vision all feel normal to him.',
+      'PMH: poorly controlled hypertension, type 2 diabetes.'
+    ],
+    exam:[
+      'Vitals: BP 176/98, HR 80 regular, SpO&#8322; 97% on air, afebrile, capillary glucose 7.8 mmol/L.',
+      'Alert and orientated, follows commands normally. Gaze and visual fields full. Face symmetrical.',
+      'Limbs: right arm and right leg both show some effort against gravity but drift down (roughly 3/5 power). Left arm and leg normal.',
+      'Coordination: no true incoordination — the weakness is proportionate, not ataxic. Sensation intact throughout.',
+      'Speech fluent and clear, no dysarthria. No neglect or extinction.'
+    ],
+    recognition:'FAST positive for arm only; face and speech normal.',
+    scoring:'ROSIER: +1 arm, +1 leg = <b>2</b>. NIHSS: arm (right) 2, leg (right) 2, all else 0 = <b>4</b> (minor stroke) — a reminder that "minor" on the NIHSS does not mean "don\'t treat"; assess whether the deficit is disabling for this patient.',
+    differentiation:'Sudden onset, vascular risk factors, no cortical signs (no aphasia, no neglect, no visual field loss) — a clean pure-motor pattern rather than a mimic.',
+    bamford:'Bamford: <b>LACI</b> — pure motor hemiparesis with no cortical signs, consistent with small-vessel (lacunar) disease.',
+    pathway:'Still requires the same urgent CT to exclude haemorrhage &rarr; <b>Ischaemic Stroke</b> pathway. "Minor" NIHSS does not mean "don\'t treat" — assess whether the deficit is disabling before ruling out thrombolysis.',
+    actions:['Full hyperacute work-up despite the low NIHSS','Assess functional impact — is a "minor" deficit still disabling for this patient?','Aggressive long-term BP and diabetes control once acute phase managed'],
+    teaching:'LACI carries the best average prognosis of the Bamford subtypes, but still needs the identical hyperacute pathway. Never assume a low NIHSS means thrombolysis isn\'t indicated — disability, not score alone, drives the decision.',
+    practiceTool:'isch' },
+
+];
+
+const diffOptions = [
+  ['Ischaemic Stroke','isch'],
+  ['Haemorrhagic Stroke','haem'],
+  ['TIA','tia'],
+  ['Mimic','train']
+];
+const diffLabels = { 'Ischaemic Stroke':'Ischaemic Stroke', 'Haemorrhagic Stroke':'Haemorrhagic Stroke', 'TIA':'TIA', 'Mimic':'Stroke Mimic' };
+
+const completedScenarios = {};
+const scenarioAnswers = {};
+let activePractice = null; // { id, title, teaser }
+
+function buildScenarioList(){
+  const container = document.getElementById('scenario-list');
+  container.innerHTML = scenarios.map((sc,i) => `
+    <button class="scenario-card" id="scenario-card-${sc.id}" onclick="openScenario(${sc.id})">
+      <div class="scenario-num">${i+1}</div>
+      <div>
+        <div class="scenario-title">${sc.title}</div>
+        <div class="scenario-teaser">${sc.teaser}</div>
+        <div class="scenario-result" id="scenario-result-${sc.id}"></div>
+      </div>
+    </button>
+  `).join('');
+}
+buildScenarioList();
+
+let currentScenarioId = null;
+function openScenario(id){
+  const sc = scenarios.find(s => s.id === id);
+  if(!sc) return;
+  currentScenarioId = id;
+  const idx = scenarios.findIndex(s => s.id === id) + 1;
+  document.getElementById('scenario-detail-title').textContent = 'Case '+idx;
+  const content = document.getElementById('scenario-detail-content');
+  content.innerHTML = `
+    <h2 style="font-size:19px;color:var(--navy);margin:2px 0 4px;">${sc.title}</h2>
+    <div class="scenario-meta">${sc.meta}</div>
+
+    <div class="scenario-block-title">Presentation</div>
+    ${sc.vignette.map(v=>`<div class="textnote" style="font-style:normal;margin:0 0 8px;">${v}</div>`).join('')}
+
+    <div class="scenario-block-title">Examination &amp; Observations</div>
+    ${sc.exam.map(v=>`<div class="textnote" style="font-style:normal;margin:0 0 8px;">${v}</div>`).join('')}
+
+    <div class="scenario-block-title">Your Differential</div>
+    <div class="textnote" style="margin:0 0 10px;">Work through this the way you would at the bedside — ABCDE, glucose, FAST/BE-FAST, ROSIER/NIHSS as relevant — then commit to a working differential before you see the answer.</div>
+    <div class="diff-grid" id="diff-grid"></div>
+    <div id="diff-feedback"></div>
+
+    <div class="scenario-answer" id="scenario-answer">
+      <div class="scenario-block-title">Diagnosis</div>
+      <span class="scenario-tag" style="background:var(--${sc.color})">${diffLabels[sc.tag]}</span>
+
+      <div class="scenario-block-title">Recognition</div>
+      <div class="refitem-box" style="border-color:var(--${sc.color});margin-bottom:14px;"><div class="refitem-tip">${sc.recognition}</div></div>
+
+      <div class="scenario-block-title">Scoring</div>
+      <div class="refitem-box" style="border-color:var(--${sc.color});margin-bottom:14px;"><div class="refitem-tip">${sc.scoring}</div></div>
+
+      ${sc.bamford ? `<div class="scenario-block-title">Classification</div><div class="refitem-box" style="border-color:var(--${sc.color});margin-bottom:14px;"><div class="refitem-tip">${sc.bamford}</div></div>` : ''}
+
+      <div class="scenario-block-title">Differentiating From A Mimic</div>
+      <div class="refitem-box" style="border-color:var(--${sc.color});margin-bottom:14px;"><div class="refitem-tip">${sc.differentiation}</div></div>
+
+      <div class="scenario-block-title">Pathway</div>
+      <div class="status-banner status-stable" style="margin:0 0 14px;text-align:left;">${sc.pathway}</div>
+
+      <div class="scenario-block-title">Key Actions</div>
+      <ul style="margin:0 0 14px;padding-left:20px;font-size:13px;color:var(--ink);">
+        ${sc.actions.map(a=>`<li style="margin-bottom:6px;">${a}</li>`).join('')}
+      </ul>
+
+      <div class="scenario-block-title">Teaching Point</div>
+      <div class="counter-block" style="background:var(--train);margin-bottom:16px;"><div style="color:#fff;font-size:13px;">${sc.teaching}</div></div>
+
+      <button class="counter-btn" style="background:var(--${sc.color})" onclick="practiceScenario('${sc.practiceTool}')">Practice This In ${toolNames[sc.practiceTool]} &rarr;</button>
+    </div>
+  `;
+  buildDiffGrid(sc);
+  if(scenarioAnswers[id] !== undefined){
+    // resume exactly where the learner left off, rather than re-asking
+    const btn = document.querySelector('#diff-grid .diff-btn[data-value="'+scenarioAnswers[id]+'"]');
+    if(btn) pickDifferential(scenarioAnswers[id], btn, true);
+  }
+  showScreen('scenario-detail');
+}
+function buildDiffGrid(sc){
+  const grid = document.getElementById('diff-grid');
+  grid.innerHTML = diffOptions.map(([label,color]) =>
+    `<button class="diff-btn" data-value="${label}" onclick="pickDifferential('${label}',this)">${diffLabels[label]}</button>`
+  ).join('');
+  document.getElementById('diff-feedback').innerHTML = '';
+  document.getElementById('scenario-answer').classList.remove('show');
+}
+function pickDifferential(chosen, btn, isResume){
+  const sc = scenarios.find(s => s.id === currentScenarioId);
+  if(!sc) return;
+  document.querySelectorAll('#diff-grid .diff-btn').forEach(b=>{
+    b.disabled = true;
+    b.classList.remove('correct','incorrect');
+    if(b === btn) b.classList.add(chosen === sc.tag ? 'correct' : 'incorrect');
+    if(b.dataset.value === sc.tag) b.classList.add('correct');
+  });
+  const correct = chosen === sc.tag;
+  const feedback = document.getElementById('diff-feedback');
+  feedback.innerHTML = `<div class="status-banner ${correct ? 'status-stable' : 'status-unstable'}" style="text-align:left;margin-top:10px;">
+    ${correct ? '&#10003; Correct' : '&#10007; Not quite'} — the diagnosis here is <b>${diffLabels[sc.tag]}</b>. Read on for the full breakdown.
+  </div>`;
+  document.getElementById('scenario-answer').classList.add('show');
+  scenarioAnswers[sc.id] = chosen;
+  markScenarioComplete(sc.id, correct);
+}
+function markScenarioComplete(id, correct){
+  completedScenarios[id] = correct;
+  const marker = document.getElementById('scenario-result-'+id);
+  if(marker) marker.innerHTML = correct
+    ? '<span class="result-pill result-correct">&#10003; Correct last time</span>'
+    : '<span class="result-pill result-incorrect">&#8635; Reviewed — try again</span>';
+}
+
+// ---- Practice mode: banner shown at the top of the tool being practised ----
+function practiceScenario(toolKey){
+  const sc = scenarios.find(s => s.id === currentScenarioId);
+  if(sc){
+    if(state[toolKey]) logEvent(toolKey, 'Practising a training case: '+sc.title);
+    activePractice = { id: sc.id, title: sc.title, teaser: sc.teaser };
+    renderPracticeBanners();
+  }
+  showScreen(toolKey);
+}
+function renderPracticeBanners(){
+  ['assess','tia','isch','haem'].forEach(key=>{
+    const slot = document.getElementById('practice-banner-'+key);
+    if(!slot) return;
+    if(!activePractice){ slot.innerHTML = ''; return; }
+    const sc = scenarios.find(s => s.id === activePractice.id);
+    const fullHtml = sc ? (
+      '<div class="pb-label">Presentation</div>' +
+      sc.vignette.map(v=>'<p>'+v+'</p>').join('') +
+      '<div class="pb-label">Examination &amp; Observations</div>' +
+      sc.exam.map(v=>'<p>'+v+'</p>').join('')
+    ) : '';
+    slot.innerHTML = `
+      <div class="practice-banner">
+        <div class="practice-banner-kicker">&#127891; PRACTISING A TRAINING CASE</div>
+        <div class="practice-banner-title">${activePractice.title}</div>
+        <div class="practice-banner-teaser">${activePractice.teaser}</div>
+        <button class="practice-banner-toggle" id="practice-banner-toggle-${key}" onclick="togglePracticeFull('${key}')">&#9662; Show Full Case</button>
+        <div class="practice-banner-full" id="practice-banner-full-${key}">${fullHtml}</div>
+        <div class="practice-banner-actions">
+          <button onclick="backToPracticeCase()">&larr; Back to Case</button>
+          <button class="end-btn" onclick="endPractice()">&#10005; End</button>
+        </div>
+      </div>`;
+  });
+}
+function togglePracticeFull(key){
+  const full = document.getElementById('practice-banner-full-'+key);
+  const btn = document.getElementById('practice-banner-toggle-'+key);
+  if(!full || !btn) return;
+  const showing = full.classList.toggle('show');
+  btn.innerHTML = showing ? '&#9652; Hide Full Case' : '&#9662; Show Full Case';
+}
+function backToPracticeCase(){
+  if(!activePractice) return;
+  openScenario(activePractice.id);
+}
+function endPractice(){
+  activePractice = null;
+  renderPracticeBanners();
+}
+
+
+// ============================================================
+// RESET — two-tap in-page confirm
+// ============================================================
+function handleResetTap(tool){
+  const st = state[tool];
+  const btn = document.getElementById('resetbtn-'+tool);
+  if(st.resetStage !== 1){
+    st.resetStage = 1;
+    btn.textContent = 'Tap to confirm';
+    btn.classList.add('confirming');
+    if(st.resetArmTimeout) clearTimeout(st.resetArmTimeout);
+    st.resetArmTimeout = setTimeout(()=>{
+      st.resetStage = 0;
+      btn.textContent = 'Reset';
+      btn.classList.remove('confirming');
+    }, 4000);
+  } else {
+    if(st.resetArmTimeout) clearTimeout(st.resetArmTimeout);
+    btn.textContent = 'Reset';
+    btn.classList.remove('confirming');
+    performReset(tool);
+  }
+}
+function clearAllIntervals(tool){
+  const st = state[tool];
+  Object.keys(st).forEach(k=>{
+    if(/Interval$/.test(k) && st[k]){ clearInterval(st[k]); }
+  });
+}
+function performReset(tool){
+  clearAllIntervals(tool);
+  state[tool] = freshState(tool);
+
+  document.getElementById(tool+'-elapsed').textContent = '00:00';
+  document.getElementById(tool+'-sw-btn').textContent = 'Start';
+  renderLog(tool);
+
+  document.querySelectorAll('.logcheck[data-tool="'+tool+'"], .symptom-check[data-tool="'+tool+'"], .symptom-check2[data-tool="'+tool+'"]').forEach(cb=>{
+    cb.checked = false;
+    const row = cb.closest('.check-row');
+    if(row) row.classList.remove('done');
+  });
+
+  if(tool==='assess') resetAssessDom();
+  if(tool==='tia') resetTiaDom();
+  if(tool==='isch') resetIschDom();
+  if(tool==='haem') resetHaemDom();
+
+  logEvent(tool, '--- Tool reset for new patient ---');
+}
+function resetAssessDom(){
+  document.getElementById('hypo-banner').classList.remove('show','stage-alarm');
+  document.getElementById('hypo-banner').textContent = '';
+  if(onsetClocks['']) { clearInterval(onsetClocks['']); delete onsetClocks['']; }
+  delete onsetReferenceTimes[''];
+  document.getElementById('onset-timer-block').style.display = 'none';
+  document.getElementById('onset-btn').textContent = 'Calculate Time Difference';
+  document.getElementById('onset-datetime').value = '';
+  document.getElementById('onset-type').value = 'onset';
+  document.getElementById('onset-error').classList.remove('show');
+  document.getElementById('onset-timer-display').textContent = '00:00:00';
+  document.getElementById('cta-performed').value = '';
+  document.getElementById('cta-result').value = '';
+  document.getElementById('cta-other').value = '';
+  document.getElementById('cta-result-wrap').style.display = 'none';
+  document.getElementById('cta-other-wrap').style.display = 'none';
+  document.getElementById('cta-followup').style.display = 'none';
+  document.querySelectorAll('#screen-assess .section .pathbtns .pathbtn').forEach(b=>b.style.outline='none');
+  selectedCtRoute = null;
+  selectedCtMessage = '';
+  lastCtaOther = '';
+  document.querySelectorAll('.rosier-check').forEach(cb=>cb.checked=false);
+  updateRosierTotal();
+  const nihssDispA = document.getElementById('nihss-result-assess');
+  if(nihssDispA){ nihssDispA.textContent = ''; nihssDispA.classList.remove('show'); }
+}
+function resetTiaDom(){
+  const banner = document.getElementById('tia-status');
+  banner.classList.remove('status-stable','status-unstable');
+  banner.classList.add('status-pending');
+  banner.textContent = 'Check red flags above to determine EMERGENCY vs. ROUTINE URGENT pathway';
+  document.getElementById('tia-emergency').classList.remove('show');
+  document.getElementById('tia-routine').classList.remove('show');
+  document.getElementById('aspirin-count').textContent = 'Not given';
+  document.getElementById('aspirin-btn').disabled = false;
+  const refBlock = document.getElementById('tia-referral-block');
+  refBlock.classList.remove('stage-warn','stage-alarm');
+  document.getElementById('tia-referral-display').textContent = '24:00:00';
+  const refBtn = document.getElementById('tia-referral-btn');
+  refBtn.disabled = false;
+  refBtn.textContent = 'Start Referral Clock';
+}
+function resetIschDom(){
+  updateIschStatus();
+  updateIschHtransform();
+  document.getElementById('thromb-count').textContent = 'Not given';
+  document.getElementById('thromb-btn').disabled = false;
+  document.getElementById('thrombolysis-evidence-panel').classList.remove('show');
+  document.getElementById('thrombolysis-evidence-btn').textContent = '\u{1F4D8} Thrombolysis — Risks, Benefits & Evidence (NNT)';
+  document.getElementById('thrombectomy-evidence-panel').classList.remove('show');
+  document.getElementById('thrombectomy-evidence-btn').textContent = '\u{1F4D8} Thrombectomy — Risks, Benefits & Evidence (NNT)';
+  document.getElementById('thrombectomy-count').textContent = 'Not performed';
+  document.getElementById('thrombectomy-btn').disabled = false;
+  document.getElementById('thrombectomy-note').textContent = 'Select a presentation to see the matching criteria.';
+  document.querySelectorAll('#screen-isch .pathbtns .pathbtn').forEach(b=>{ b.style.background=''; b.style.color=''; });
+  const obsBlock = document.getElementById('obs-timer-block');
+  obsBlock.classList.remove('stage-warn','stage-alarm');
+  document.getElementById('obs-timer-display').textContent = '15:00';
+  document.getElementById('obs-timer-caption').textContent = obsStages[0].label;
+  const obsBtn = document.getElementById('obs-btn');
+  obsBtn.disabled = false;
+  obsBtn.textContent = 'Start Post-Thrombolysis Obs Timer';
+  if(onsetClocks['-isch']) { clearInterval(onsetClocks['-isch']); delete onsetClocks['-isch']; }
+  delete onsetReferenceTimes['-isch'];
+  document.getElementById('onset-timer-block-isch').style.display = 'none';
+  document.getElementById('onset-btn-isch').textContent = 'Calculate Time Difference';
+  document.getElementById('onset-datetime-isch').value = '';
+  document.getElementById('onset-type-isch').value = 'onset';
+  document.getElementById('onset-error-isch').classList.remove('show');
+  document.getElementById('onset-timer-display-isch').textContent = '00:00:00';
+  const nihssDispI = document.getElementById('nihss-result-isch');
+  if(nihssDispI){ nihssDispI.textContent = ''; nihssDispI.classList.remove('show'); }
+}
+function resetHaemDom(){
+  updateHaemStatus();
+  const bpBlock = document.getElementById('bp-timer-block');
+  bpBlock.classList.remove('stage-warn','stage-alarm');
+  document.getElementById('bp-timer-display').textContent = '60:00';
+  const bpBtn = document.getElementById('bp-btn');
+  bpBtn.disabled = false;
+  bpBtn.textContent = 'Start BP Target Clock';
+  document.getElementById('reversal-note').textContent = 'Select the anticoagulant to see the specific reversal steps. Discontinue anticoagulation immediately in every case, regardless of agent.';
+  document.getElementById('reversal-count').textContent = 'Not given';
+  document.getElementById('reversal-btn').disabled = false;
+  document.querySelectorAll('#screen-haem .pathbtns .pathbtn').forEach(b=>{ b.style.background=''; b.style.color=''; });
+}
+</script>
+</body>
+</html>
