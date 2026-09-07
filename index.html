@@ -428,7 +428,7 @@ button{font-family:inherit;cursor:pointer;}
 <!-- ================= 2. TIA PATHWAY ================= -->
 <div class="screen" id="screen-tia">
   <div class="topbar" style="background:var(--tia)">
-    <button class="backbtn" onclick="showMenu()">&larr; Menu</button>
+    <button class="backbtn" onclick="returnToAssessment()">&larr; Assess</button>
     <div class="topbar-title">TIA Pathway</div>
     <button class="refbtn" onclick="openRefHub('tia')">&#128202; Ref</button>
     <button class="resetbtn" id="resetbtn-tia" onclick="handleResetTap('tia')">Reset</button>
@@ -533,7 +533,7 @@ button{font-family:inherit;cursor:pointer;}
 <!-- ================= 3. ISCHAEMIC STROKE ================= -->
 <div class="screen" id="screen-isch">
   <div class="topbar" style="background:var(--isch)">
-    <button class="backbtn" onclick="showMenu()">&larr; Menu</button>
+    <button class="backbtn" onclick="returnToAssessment()">&larr; Assess</button>
     <div class="topbar-title">Ischaemic Stroke</div>
     <button class="refbtn" onclick="openRefHub('isch')">&#128202; Ref</button>
     <button class="resetbtn" id="resetbtn-isch" onclick="handleResetTap('isch')">Reset</button>
@@ -718,7 +718,7 @@ button{font-family:inherit;cursor:pointer;}
 <!-- ================= 4. HAEMORRHAGIC STROKE ================= -->
 <div class="screen" id="screen-haem">
   <div class="topbar" style="background:var(--haem)">
-    <button class="backbtn" onclick="showMenu()">&larr; Menu</button>
+    <button class="backbtn" onclick="returnToAssessment()">&larr; Assess</button>
     <div class="topbar-title">Haemorrhagic Stroke</div>
     <button class="refbtn" onclick="openRefHub('haem')">&#128202; Ref</button>
     <button class="resetbtn" id="resetbtn-haem" onclick="handleResetTap('haem')">Reset</button>
@@ -1482,6 +1482,7 @@ function setOnsetReference(suffix){
 let lastCtaOther = '';
 let selectedCtRoute = null;
 let selectedCtMessage = '';
+let assessmentReturnScrollY = 0;
 function selectCtResult(btn,toTool,msg){
   selectedCtRoute = toTool;
   selectedCtMessage = msg;
@@ -1494,12 +1495,21 @@ function selectCtResult(btn,toTool,msg){
 function continueAfterImaging(){
   if(!selectedCtRoute) return;
   const destination = selectedCtRoute;
+  assessmentReturnScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
   showScreen(destination);
   window.scrollTo({top:0,left:0,behavior:'auto'});
   document.documentElement.scrollTop = 0;
   document.body.scrollTop = 0;
   requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'auto'}));
   logEvent(destination,'Management pathway opened following imaging selection');
+}
+function returnToAssessment(){
+  showScreen('assess');
+  const returnPosition = Math.max(0,assessmentReturnScrollY || 0);
+  window.scrollTo({top:returnPosition,left:0,behavior:'auto'});
+  document.documentElement.scrollTop = returnPosition;
+  document.body.scrollTop = returnPosition;
+  requestAnimationFrame(()=>window.scrollTo({top:returnPosition,left:0,behavior:'auto'}));
 }
 function updateCtaPerformed(){
   const performed = document.getElementById('cta-performed').value;
@@ -2408,6 +2418,7 @@ function resetAssessDom(){
   document.querySelectorAll('#screen-assess .section .pathbtns .pathbtn').forEach(b=>b.style.outline='none');
   selectedCtRoute = null;
   selectedCtMessage = '';
+  assessmentReturnScrollY = 0;
   lastCtaOther = '';
   document.querySelectorAll('.rosier-check').forEach(cb=>cb.checked=false);
   updateRosierTotal();
