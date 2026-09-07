@@ -407,7 +407,7 @@ button{font-family:inherit;cursor:pointer;}
   </div>
 
   <div class="section">
-    <div class="section-title">Assessment Log</div>
+    <div class="section-title">Complete Encounter Log</div>
     <div class="logbox" id="assess-log"><div class="logempty">No actions logged yet.</div></div>
     <div id="assess-log-controls">
       <div class="log-actions">
@@ -438,6 +438,15 @@ button{font-family:inherit;cursor:pointer;}
     <button onclick="toggleStopwatch('tia')" id="tia-sw-btn">Start</button>
   </div>
   <div id="practice-banner-tia"></div>
+
+  <div class="section" style="padding-bottom:0;">
+    <div class="input-card carried-onset-card" data-carried-onset>
+      <div class="input-label">Onset / last known well carried from Rapid Assessment</div>
+      <div class="carried-onset-value">No reference time recorded in this encounter.</div>
+      <div class="carried-onset-elapsed" style="font-weight:700;color:var(--navy);margin-top:5px;"></div>
+      <button class="counter-btn carried-onset-missing" style="background:var(--assess);display:none;" onclick="showScreen('assess')">Record in Rapid Assessment</button>
+    </div>
+  </div>
 
   <div class="section">
     <div class="section-title">Confirm This Is a TIA</div>
@@ -503,7 +512,7 @@ button{font-family:inherit;cursor:pointer;}
   </div>
 
   <div class="section">
-    <div class="section-title">Assessment Log</div>
+    <div class="section-title">Complete Encounter Log</div>
     <div class="logbox" id="tia-log"><div class="logempty">No actions logged yet.</div></div>
     <div id="tia-log-controls">
       <div class="log-actions">
@@ -536,23 +545,11 @@ button{font-family:inherit;cursor:pointer;}
   <div id="practice-banner-isch"></div>
 
   <div class="section">
-    <div class="section-title">Onset / Last Known Well — Window Tracker</div>
-    <div class="textnote" style="margin:0 0 8px;">Enter the best-known clinical reference time. The elapsed time is calculated against the device clock.</div>
-    <div class="input-card">
-      <label class="input-label" for="onset-type-isch">Reference time</label>
-      <select class="clinical-select" id="onset-type-isch">
-        <option value="onset">Symptoms came on</option>
-        <option value="lkw">Last seen well</option>
-      </select>
-      <label class="input-label" for="onset-datetime-isch" style="margin-top:10px;">Date and time</label>
-      <input class="clinical-input" id="onset-datetime-isch" type="datetime-local">
-      <div class="input-error" id="onset-error-isch"></div>
-      <button class="counter-btn" style="background:var(--isch)" onclick="setOnsetReference('-isch')" id="onset-btn-isch">Calculate Time Difference</button>
-    </div>
-    <div class="timer-block" id="onset-timer-block-isch" style="display:none;">
-      <div class="cycle-badge" id="onset-badge-isch">Time since onset</div>
-      <div class="timer-display" id="onset-timer-display-isch">00:00:00</div>
-      <div class="timer-caption" id="onset-timer-caption-isch">Standard window closes at 4:30:00</div>
+    <div class="input-card carried-onset-card" data-carried-onset>
+      <div class="input-label">Onset / last known well carried from Rapid Assessment</div>
+      <div class="carried-onset-value">No reference time recorded in this encounter.</div>
+      <div class="carried-onset-elapsed" style="font-weight:700;color:var(--navy);margin-top:5px;"></div>
+      <button class="counter-btn carried-onset-missing" style="background:var(--assess);display:none;" onclick="showScreen('assess')">Record in Rapid Assessment</button>
     </div>
     <div class="textnote">Target metrics: door-to-CT &lt;15&ndash;25 min; door-to-needle &lt;30&ndash;45 min; door-to-groin-puncture as fast as local pathways allow.</div>
   </div>
@@ -700,7 +697,7 @@ button{font-family:inherit;cursor:pointer;}
   </div>
 
   <div class="section">
-    <div class="section-title">Assessment Log</div>
+    <div class="section-title">Complete Encounter Log</div>
     <div class="logbox" id="isch-log"><div class="logempty">No actions logged yet.</div></div>
     <div id="isch-log-controls">
       <div class="log-actions">
@@ -731,6 +728,15 @@ button{font-family:inherit;cursor:pointer;}
     <button onclick="toggleStopwatch('haem')" id="haem-sw-btn">Start</button>
   </div>
   <div id="practice-banner-haem"></div>
+
+  <div class="section" style="padding-bottom:0;">
+    <div class="input-card carried-onset-card" data-carried-onset>
+      <div class="input-label">Onset / last known well carried from Rapid Assessment</div>
+      <div class="carried-onset-value">No reference time recorded in this encounter.</div>
+      <div class="carried-onset-elapsed" style="font-weight:700;color:var(--navy);margin-top:5px;"></div>
+      <button class="counter-btn carried-onset-missing" style="background:var(--assess);display:none;" onclick="showScreen('assess')">Record in Rapid Assessment</button>
+    </div>
+  </div>
 
   <div class="section">
     <div class="section-title">Clinical Clues (No Sign Is Definitive — CT Confirms)</div>
@@ -801,7 +807,7 @@ button{font-family:inherit;cursor:pointer;}
   </div>
 
   <div class="section">
-    <div class="section-title">Assessment Log</div>
+    <div class="section-title">Complete Encounter Log</div>
     <div class="logbox" id="haem-log"><div class="logempty">No actions logged yet.</div></div>
     <div id="haem-log-controls">
       <div class="log-actions">
@@ -978,6 +984,7 @@ function freshState(tool){
   return base;
 }
 const state = { assess: freshState('assess'), tia: freshState('tia'), isch: freshState('isch'), haem: freshState('haem') };
+let encounterLog = [];
 
 function nowClock(){ return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 function fmt(ms){
@@ -1006,6 +1013,7 @@ function showScreen(key){
   document.getElementById('menu').style.display='none';
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+key).classList.add('active');
+  updateCarriedOnsetDisplay();
   updateBottomNav();
 }
 function routeTo(toTool, msg){
@@ -1089,8 +1097,8 @@ function toggleStopwatch(tool){
 // ============================================================
 // GENERIC LOGGING
 // ============================================================
-const LOG_STORAGE_KEY = 'stroke-tia-navigator-recent-logs-v1';
-const TOOL_TITLES = {assess:'Rapid Assessment',tia:'TIA Pathway',isch:'Ischaemic Stroke',haem:'Haemorrhagic Stroke'};
+const LOG_STORAGE_KEY = 'stroke-tia-navigator-complete-encounter-logs-v2';
+const TOOL_TITLES = {encounter:'Complete Stroke/TIA Encounter',assess:'Rapid Assessment',tia:'TIA Pathway',isch:'Ischaemic Stroke',haem:'Haemorrhagic Stroke'};
 let recentLogs = loadRecentLogs();
 
 function loadRecentLogs(){
@@ -1106,15 +1114,17 @@ function persistRecentLogs(){
 function logEvent(tool, text){
   const st = state[tool];
   if(!st) return;
-  st.log.unshift({time: nowClock(), iso:new Date().toISOString(), text});
-  renderLog(tool);
+  encounterLog.unshift({time: nowClock(),iso:new Date().toISOString(),source:tool,text});
+  renderAllLogs();
 }
 function renderLog(tool){
   const box = document.getElementById(tool+'-log');
   if(!box) return;
-  const st = state[tool];
-  if(st.log.length===0){ box.innerHTML = '<div class="logempty">No actions logged yet.</div>'; return; }
-  box.innerHTML = st.log.map(e=>`<div class="logentry">${escapeHtml(e.time)} — ${escapeHtml(e.text)}</div>`).join('');
+  if(encounterLog.length===0){ box.innerHTML = '<div class="logempty">No actions logged yet.</div>'; return; }
+  box.innerHTML = encounterLog.map(e=>`<div class="logentry">${escapeHtml(e.time)} — <b>${escapeHtml(TOOL_TITLES[e.source] || 'Encounter')}:</b> ${escapeHtml(e.text)}</div>`).join('');
+}
+function renderAllLogs(){
+  ['assess','tia','isch','haem'].forEach(renderLog);
 }
 function escapeHtml(value){
   return String(value).replace(/[&<>"']/g,ch=>({
@@ -1149,30 +1159,30 @@ function chronologicalEntries(entries){
 }
 function buildLogSummary(tool, entries, savedAt){
   const ordered = chronologicalEntries(entries);
-  const heading = TOOL_TITLES[tool] || 'Clinical pathway';
+  const heading = TOOL_TITLES.encounter;
   const when = savedAt ? new Date(savedAt) : new Date();
   const lines = [heading+' log summary','Generated: '+when.toLocaleString(),'Documented actions: '+ordered.length,''];
   if(!ordered.length) lines.push('No actions have been logged.');
   else{
     lines.push('Chronological event summary:');
-    ordered.forEach(e=>lines.push('- '+e.time+' — '+e.text));
+    ordered.forEach(e=>lines.push('- '+e.time+' — '+(TOOL_TITLES[e.source] || 'Encounter')+': '+e.text));
   }
   lines.push('','Clinical decision-support log only. Verify against the formal clinical record and local protocol.');
   return lines.join('\n');
 }
 function generateLogSummary(tool){
   const target = document.getElementById(tool+'-log-summary');
-  target.textContent = buildLogSummary(tool,state[tool].log);
+  target.textContent = buildLogSummary('encounter',encounterLog);
   target.classList.add('show');
   target.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function archiveLog(tool, announce){
-  const entries = state[tool] ? state[tool].log : [];
+  const entries = encounterLog;
   if(!entries.length){
     if(announce) alert('There are no events in the current log to save.');
     return false;
   }
-  const signature = tool+'|'+entries.map(e=>(e.iso||'')+'|'+e.text).join('||');
+  const signature = entries.map(e=>(e.iso||'')+'|'+(e.source||'')+'|'+e.text).join('||');
   const alreadySaved = recentLogs.find(item=>item.signature===signature);
   if(alreadySaved){
     if(announce) alert('This current log is already saved.');
@@ -1180,15 +1190,15 @@ function archiveLog(tool, announce){
   }
   const savedAt = new Date().toISOString();
   const snapshot = {
-    id:savedAt+'-'+Math.random().toString(36).slice(2,8), tool, savedAt, signature,
-    entries:entries.map(e=>({time:e.time,iso:e.iso||'',text:e.text})),
-    summary:buildLogSummary(tool,entries,savedAt)
+    id:savedAt+'-'+Math.random().toString(36).slice(2,8), tool:'encounter', savedAt, signature,
+    entries:entries.map(e=>({time:e.time,iso:e.iso||'',source:e.source||'encounter',text:e.text})),
+    summary:buildLogSummary('encounter',entries,savedAt)
   };
   recentLogs.unshift(snapshot);
   recentLogs = recentLogs.slice(0,5);
   persistRecentLogs();
   renderSavedLogs();
-  if(announce) alert('Log saved. The five most recent saved logs are retained on this device.');
+  if(announce) alert('Complete encounter log saved. The five most recent encounter logs are retained on this device.');
   return true;
 }
 function renderSavedLogs(){
@@ -1296,8 +1306,8 @@ async function downloadLogPdf(tool,entries,savedAt){
   setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
 function exportCurrentLogPdf(tool){
-  if(!state[tool].log.length){ alert('There are no events in the current log to export.'); return; }
-  downloadLogPdf(tool,state[tool].log,new Date().toISOString());
+  if(!encounterLog.length){ alert('There are no events in the current encounter log to export.'); return; }
+  downloadLogPdf('encounter',encounterLog,new Date().toISOString());
 }
 function exportSavedLogPdf(id){
   const log=recentLogs.find(item=>item.id===id);
@@ -1418,6 +1428,26 @@ function renderOnsetElapsed(suffix){
     block.classList.add('stage-alarm');
     cap.textContent = 'Standard and extended IV thrombolysis windows have passed';
   }
+  if(suffix==='') updateCarriedOnsetDisplay();
+}
+function updateCarriedOnsetDisplay(){
+  const referenceTime = onsetReferenceTimes[''];
+  const typeInput = document.getElementById('onset-type');
+  const typeLabel = typeInput && typeInput.value==='lkw' ? 'Last seen well' : 'Symptom onset';
+  document.querySelectorAll('[data-carried-onset]').forEach(card=>{
+    const value = card.querySelector('.carried-onset-value');
+    const elapsed = card.querySelector('.carried-onset-elapsed');
+    const missing = card.querySelector('.carried-onset-missing');
+    if(referenceTime){
+      value.textContent = typeLabel+': '+new Date(referenceTime).toLocaleString();
+      elapsed.textContent = 'Elapsed: '+fmtHMS(Date.now()-referenceTime);
+      missing.style.display = 'none';
+    }else{
+      value.textContent = 'No onset or last-known-well time has been recorded in this encounter.';
+      elapsed.textContent = '';
+      missing.style.display = 'block';
+    }
+  });
 }
 function setOnsetReference(suffix){
   suffix = suffix || '';
@@ -1463,7 +1493,9 @@ function selectCtResult(btn,toTool,msg){
 }
 function continueAfterImaging(){
   if(!selectedCtRoute) return;
-  routeTo(selectedCtRoute,selectedCtMessage);
+  const destination = selectedCtRoute;
+  showScreen(destination);
+  logEvent(destination,'Management pathway opened following imaging selection');
 }
 function updateCtaPerformed(){
   const performed = document.getElementById('cta-performed').value;
@@ -2332,24 +2364,25 @@ function clearAllIntervals(tool){
 }
 function performReset(tool){
   archiveLog(tool,false);
-  clearAllIntervals(tool);
-  state[tool] = freshState(tool);
-
-  document.getElementById(tool+'-elapsed').textContent = '00:00';
-  document.getElementById(tool+'-sw-btn').textContent = 'Start';
-  renderLog(tool);
-
-  document.querySelectorAll('.logcheck[data-tool="'+tool+'"], .symptom-check[data-tool="'+tool+'"], .symptom-check2[data-tool="'+tool+'"]').forEach(cb=>{
+  encounterLog = [];
+  const tools = ['assess','tia','isch','haem'];
+  tools.forEach(key=>clearAllIntervals(key));
+  tools.forEach(key=>{
+    state[key] = freshState(key);
+    document.getElementById(key+'-elapsed').textContent = '00:00';
+    document.getElementById(key+'-sw-btn').textContent = 'Start';
+  });
+  document.querySelectorAll('.logcheck, .symptom-check, .symptom-check2').forEach(cb=>{
     cb.checked = false;
     const row = cb.closest('.check-row');
     if(row) row.classList.remove('done');
   });
-
-  if(tool==='assess') resetAssessDom();
-  if(tool==='tia') resetTiaDom();
-  if(tool==='isch') resetIschDom();
-  if(tool==='haem') resetHaemDom();
-
+  resetAssessDom();
+  resetTiaDom();
+  resetIschDom();
+  resetHaemDom();
+  document.querySelectorAll('.log-summary').forEach(el=>{ el.textContent=''; el.classList.remove('show'); });
+  renderAllLogs();
 }
 function resetAssessDom(){
   document.getElementById('hypo-banner').classList.remove('show','stage-alarm');
@@ -2376,6 +2409,7 @@ function resetAssessDom(){
   updateRosierTotal();
   const nihssDispA = document.getElementById('nihss-result-assess');
   if(nihssDispA){ nihssDispA.textContent = ''; nihssDispA.classList.remove('show'); }
+  updateCarriedOnsetDisplay();
 }
 function resetTiaDom(){
   const banner = document.getElementById('tia-status');
@@ -2413,14 +2447,6 @@ function resetIschDom(){
   const obsBtn = document.getElementById('obs-btn');
   obsBtn.disabled = false;
   obsBtn.textContent = 'Start Post-Thrombolysis Obs Timer';
-  if(onsetClocks['-isch']) { clearInterval(onsetClocks['-isch']); delete onsetClocks['-isch']; }
-  delete onsetReferenceTimes['-isch'];
-  document.getElementById('onset-timer-block-isch').style.display = 'none';
-  document.getElementById('onset-btn-isch').textContent = 'Calculate Time Difference';
-  document.getElementById('onset-datetime-isch').value = '';
-  document.getElementById('onset-type-isch').value = 'onset';
-  document.getElementById('onset-error-isch').classList.remove('show');
-  document.getElementById('onset-timer-display-isch').textContent = '00:00:00';
   const nihssDispI = document.getElementById('nihss-result-isch');
   if(nihssDispI){ nihssDispI.textContent = ''; nihssDispI.classList.remove('show'); }
 }
