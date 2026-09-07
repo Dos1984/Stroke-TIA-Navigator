@@ -24,13 +24,13 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;background:#EDEFF5;}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Calibri,Arial,sans-serif;color:var(--ink);line-height:1.4;}
-.wrap{max-width:640px;margin:0 auto;background:#fff;min-height:100vh;padding-bottom:82px;}
+.wrap{max-width:640px;margin:0 auto;background:#fff;min-height:100vh;padding-bottom:calc(82px + env(safe-area-inset-bottom, 0px));}
 h1,h2,h3{font-family:Cambria,Georgia,serif;margin:0;}
 button{font-family:inherit;cursor:pointer;}
 
 /* ---------- Menu ---------- */
-#menu{padding:34px 20px 20px;}
-.menu-header{background:var(--navy);color:#fff;margin:-34px -20px 22px;padding:34px 20px 26px;}
+#menu{padding:calc(34px + env(safe-area-inset-top, 0px)) 20px 20px;}
+.menu-header{background:var(--navy);color:#fff;margin:calc(-34px - env(safe-area-inset-top, 0px)) -20px 22px;padding:calc(34px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 26px max(20px, env(safe-area-inset-left, 0px));}
 .menu-kicker{font-size:12px;letter-spacing:2px;font-weight:700;color:var(--ice);margin-bottom:10px;}
 .menu-title{font-size:24px;color:#fff;line-height:1.3;}
 .menu-sub{font-size:13.5px;color:var(--ice);margin-top:10px;font-style:italic;}
@@ -48,7 +48,7 @@ button{font-family:inherit;cursor:pointer;}
 /* ---------- Screen shell ---------- */
 .screen{display:none;}
 .screen.active{display:block;}
-.topbar{position:sticky;top:0;z-index:5;color:#fff;padding:14px 12px 12px;display:flex;align-items:center;gap:6px;}
+.topbar{position:sticky;top:0;z-index:5;color:#fff;padding:calc(14px + env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) 12px max(12px, env(safe-area-inset-left, 0px));display:flex;align-items:center;gap:6px;}
 .backbtn{background:rgba(255,255,255,0.18);border:none;color:#fff;border-radius:8px;padding:8px 10px;font-size:12.5px;font-weight:600;flex:0 0 auto;}
 .topbar-title{font-size:15px;font-weight:700;font-family:Cambria,serif;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .refbtn{background:rgba(255,255,255,0.18);border:none;color:#fff;border-radius:8px;padding:8px 9px;font-size:11.5px;font-weight:700;flex:0 0 auto;white-space:nowrap;}
@@ -116,6 +116,19 @@ button{font-family:inherit;cursor:pointer;}
 .logbox{background:var(--navy-dark);border-radius:12px;padding:12px 14px;max-height:220px;overflow-y:auto;}
 .logbox .logentry{font-size:12.5px;color:var(--ice);font-family:"Courier New",monospace;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.08);}
 .logbox .logempty{font-size:12.5px;color:var(--muted);}
+.log-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.log-action-btn{border:none;border-radius:9px;padding:11px 8px;background:var(--navy);color:#fff;font-size:12.5px;font-weight:700;}
+.log-action-btn.secondary{background:#E9EDF6;color:var(--navy);border:1px solid #C9D0E0;}
+.log-summary{display:none;margin-top:10px;padding:12px 13px;border:1.5px solid #C9D0E0;border-radius:10px;background:#F7F8FC;font-size:12.5px;white-space:pre-wrap;}
+.log-summary.show{display:block;}
+.saved-logs{margin-top:16px;}
+.saved-log-card{border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;margin-top:8px;background:#fff;}
+.saved-log-title{font-size:12.5px;font-weight:700;color:var(--navy);}
+.saved-log-meta{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.saved-log-actions{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;}
+.saved-log-actions button{border:1px solid #C9D0E0;background:#F1F3F8;color:var(--navy);border-radius:7px;padding:7px 9px;font-size:11.5px;font-weight:700;}
+.saved-log-actions button.delete-log{color:var(--warn);background:#FFF4F2;border-color:#E6B8B2;}
+.log-privacy{font-size:11.5px;color:var(--muted);margin-top:8px;}
 
 .flag-strip{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
 .flag-btn{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:8px 14px;font-size:12.5px;font-weight:700;color:var(--ink);}
@@ -158,7 +171,7 @@ button{font-family:inherit;cursor:pointer;}
 .summary-table th{background:var(--navy);color:#fff;font-size:11px;}
 
 /* ---------- Bottom Navigation ---------- */
-.bottomnav{position:fixed;bottom:0;left:0;right:0;max-width:640px;margin:0 auto;background:#fff;border-top:1.5px solid var(--line);display:flex;z-index:30;box-shadow:0 -2px 10px rgba(0,0,0,0.08);}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;max-width:640px;margin:0 auto;background:#fff;border-top:1.5px solid var(--line);display:flex;z-index:30;box-shadow:0 -2px 10px rgba(0,0,0,0.08);padding-bottom:env(safe-area-inset-bottom, 0px);padding-left:env(safe-area-inset-left, 0px);padding-right:env(safe-area-inset-right, 0px);}
 .bottomnav button{flex:1;background:none;border:none;padding:9px 2px 8px;font-size:10.2px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;}
 .bottomnav button .nav-icon{font-size:19px;line-height:1;}
 .bottomnav button.active{color:var(--navy);}
@@ -200,6 +213,12 @@ button{font-family:inherit;cursor:pointer;}
 .practice-banner-actions{display:flex;gap:8px;}
 .practice-banner-actions button{flex:1;background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:9px 8px;font-size:12px;font-weight:700;}
 .practice-banner-actions button.end-btn{background:rgba(0,0,0,0.18);flex:0 0 auto;padding:9px 14px;}
+
+@media (max-width:390px){
+  .topbar{gap:4px;}
+  .backbtn,.refbtn,.resetbtn{padding-left:7px;padding-right:7px;font-size:11px;}
+  .topbar-title{font-size:14px;}
+}
 </style>
 </head>
 <body>
@@ -390,6 +409,19 @@ button{font-family:inherit;cursor:pointer;}
   <div class="section">
     <div class="section-title">Assessment Log</div>
     <div class="logbox" id="assess-log"><div class="logempty">No actions logged yet.</div></div>
+    <div id="assess-log-controls">
+      <div class="log-actions">
+        <button class="log-action-btn" onclick="generateLogSummary('assess')">Generate Summary</button>
+        <button class="log-action-btn secondary" onclick="archiveLog('assess',true)">Save Current Log</button>
+        <button class="log-action-btn" onclick="exportCurrentLogPdf('assess')">Generate PDF</button>
+      </div>
+      <div class="log-summary" id="assess-log-summary"></div>
+      <div class="log-privacy">Stores only the five most recent saved logs on this device. Do not enter names, record numbers, dates of birth, addresses or contact details.</div>
+      <div class="saved-logs">
+        <div class="section-title" style="margin-bottom:4px;">Prior Logs (maximum 5)</div>
+        <div id="assess-saved-logs"><div class="textnote">No prior logs saved.</div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -473,6 +505,19 @@ button{font-family:inherit;cursor:pointer;}
   <div class="section">
     <div class="section-title">Assessment Log</div>
     <div class="logbox" id="tia-log"><div class="logempty">No actions logged yet.</div></div>
+    <div id="tia-log-controls">
+      <div class="log-actions">
+        <button class="log-action-btn" onclick="generateLogSummary('tia')">Generate Summary</button>
+        <button class="log-action-btn secondary" onclick="archiveLog('tia',true)">Save Current Log</button>
+        <button class="log-action-btn" onclick="exportCurrentLogPdf('tia')">Generate PDF</button>
+      </div>
+      <div class="log-summary" id="tia-log-summary"></div>
+      <div class="log-privacy">Stores only the five most recent saved logs on this device. Do not enter names, record numbers, dates of birth, addresses or contact details.</div>
+      <div class="saved-logs">
+        <div class="section-title" style="margin-bottom:4px;">Prior Logs (maximum 5)</div>
+        <div id="tia-saved-logs"><div class="textnote">No prior logs saved.</div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -657,6 +702,19 @@ button{font-family:inherit;cursor:pointer;}
   <div class="section">
     <div class="section-title">Assessment Log</div>
     <div class="logbox" id="isch-log"><div class="logempty">No actions logged yet.</div></div>
+    <div id="isch-log-controls">
+      <div class="log-actions">
+        <button class="log-action-btn" onclick="generateLogSummary('isch')">Generate Summary</button>
+        <button class="log-action-btn secondary" onclick="archiveLog('isch',true)">Save Current Log</button>
+        <button class="log-action-btn" onclick="exportCurrentLogPdf('isch')">Generate PDF</button>
+      </div>
+      <div class="log-summary" id="isch-log-summary"></div>
+      <div class="log-privacy">Stores only the five most recent saved logs on this device. Do not enter names, record numbers, dates of birth, addresses or contact details.</div>
+      <div class="saved-logs">
+        <div class="section-title" style="margin-bottom:4px;">Prior Logs (maximum 5)</div>
+        <div id="isch-saved-logs"><div class="textnote">No prior logs saved.</div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -745,6 +803,19 @@ button{font-family:inherit;cursor:pointer;}
   <div class="section">
     <div class="section-title">Assessment Log</div>
     <div class="logbox" id="haem-log"><div class="logempty">No actions logged yet.</div></div>
+    <div id="haem-log-controls">
+      <div class="log-actions">
+        <button class="log-action-btn" onclick="generateLogSummary('haem')">Generate Summary</button>
+        <button class="log-action-btn secondary" onclick="archiveLog('haem',true)">Save Current Log</button>
+        <button class="log-action-btn" onclick="exportCurrentLogPdf('haem')">Generate PDF</button>
+      </div>
+      <div class="log-summary" id="haem-log-summary"></div>
+      <div class="log-privacy">Stores only the five most recent saved logs on this device. Do not enter names, record numbers, dates of birth, addresses or contact details.</div>
+      <div class="saved-logs">
+        <div class="section-title" style="margin-bottom:4px;">Prior Logs (maximum 5)</div>
+        <div id="haem-saved-logs"><div class="textnote">No prior logs saved.</div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1018,10 +1089,24 @@ function toggleStopwatch(tool){
 // ============================================================
 // GENERIC LOGGING
 // ============================================================
+const LOG_STORAGE_KEY = 'stroke-tia-navigator-recent-logs-v1';
+const TOOL_TITLES = {assess:'Rapid Assessment',tia:'TIA Pathway',isch:'Ischaemic Stroke',haem:'Haemorrhagic Stroke'};
+let recentLogs = loadRecentLogs();
+
+function loadRecentLogs(){
+  try{
+    const parsed = JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed.slice(0,5) : [];
+  }catch(e){ return []; }
+}
+function persistRecentLogs(){
+  try{ localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(recentLogs.slice(0,5))); }
+  catch(e){ /* The live log still works if private storage is unavailable. */ }
+}
 function logEvent(tool, text){
   const st = state[tool];
   if(!st) return;
-  st.log.unshift({time: nowClock(), text});
+  st.log.unshift({time: nowClock(), iso:new Date().toISOString(), text});
   renderLog(tool);
 }
 function renderLog(tool){
@@ -1035,6 +1120,188 @@ function escapeHtml(value){
   return String(value).replace(/[&<>"']/g,ch=>({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
   })[ch]);
+}
+
+function ensureLogControls(){
+  ['assess','tia','isch','haem'].forEach(tool=>{
+    const box = document.getElementById(tool+'-log');
+    if(!box || document.getElementById(tool+'-log-controls')) return;
+    const controls = document.createElement('div');
+    controls.id = tool+'-log-controls';
+    controls.innerHTML = `
+      <div class="log-actions">
+        <button class="log-action-btn" onclick="generateLogSummary('${tool}')">Generate Summary</button>
+        <button class="log-action-btn secondary" onclick="archiveLog('${tool}',true)">Save Current Log</button>
+        <button class="log-action-btn" onclick="exportCurrentLogPdf('${tool}')">Generate PDF</button>
+      </div>
+      <div class="log-summary" id="${tool}-log-summary"></div>
+      <div class="log-privacy">Stores only the five most recent saved logs on this device. Do not enter names, record numbers, dates of birth, addresses or contact details.</div>
+      <div class="saved-logs">
+        <div class="section-title" style="margin-bottom:4px;">Prior Logs (maximum 5)</div>
+        <div id="${tool}-saved-logs"></div>
+      </div>`;
+    box.insertAdjacentElement('afterend', controls);
+  });
+  renderSavedLogs();
+}
+function chronologicalEntries(entries){
+  return entries.slice().sort((a,b)=>(a.iso && b.iso) ? a.iso.localeCompare(b.iso) : 0);
+}
+function buildLogSummary(tool, entries, savedAt){
+  const ordered = chronologicalEntries(entries);
+  const heading = TOOL_TITLES[tool] || 'Clinical pathway';
+  const when = savedAt ? new Date(savedAt) : new Date();
+  const lines = [heading+' log summary','Generated: '+when.toLocaleString(),'Documented actions: '+ordered.length,''];
+  if(!ordered.length) lines.push('No actions have been logged.');
+  else{
+    lines.push('Chronological event summary:');
+    ordered.forEach(e=>lines.push('- '+e.time+' — '+e.text));
+  }
+  lines.push('','Clinical decision-support log only. Verify against the formal clinical record and local protocol.');
+  return lines.join('\n');
+}
+function generateLogSummary(tool){
+  const target = document.getElementById(tool+'-log-summary');
+  target.textContent = buildLogSummary(tool,state[tool].log);
+  target.classList.add('show');
+  target.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function archiveLog(tool, announce){
+  const entries = state[tool] ? state[tool].log : [];
+  if(!entries.length){
+    if(announce) alert('There are no events in the current log to save.');
+    return false;
+  }
+  const signature = tool+'|'+entries.map(e=>(e.iso||'')+'|'+e.text).join('||');
+  const alreadySaved = recentLogs.find(item=>item.signature===signature);
+  if(alreadySaved){
+    if(announce) alert('This current log is already saved.');
+    return true;
+  }
+  const savedAt = new Date().toISOString();
+  const snapshot = {
+    id:savedAt+'-'+Math.random().toString(36).slice(2,8), tool, savedAt, signature,
+    entries:entries.map(e=>({time:e.time,iso:e.iso||'',text:e.text})),
+    summary:buildLogSummary(tool,entries,savedAt)
+  };
+  recentLogs.unshift(snapshot);
+  recentLogs = recentLogs.slice(0,5);
+  persistRecentLogs();
+  renderSavedLogs();
+  if(announce) alert('Log saved. The five most recent saved logs are retained on this device.');
+  return true;
+}
+function renderSavedLogs(){
+  ['assess','tia','isch','haem'].forEach(tool=>{
+    const target = document.getElementById(tool+'-saved-logs');
+    if(!target) return;
+    if(!recentLogs.length){ target.innerHTML='<div class="textnote">No prior logs saved.</div>'; return; }
+    target.innerHTML = recentLogs.map(log=>{
+      const title = TOOL_TITLES[log.tool] || 'Clinical pathway';
+      const date = new Date(log.savedAt).toLocaleString();
+      return `<div class="saved-log-card">
+        <div class="saved-log-title">${escapeHtml(title)}</div>
+        <div class="saved-log-meta">${escapeHtml(date)} · ${log.entries.length} events</div>
+        <div class="saved-log-actions">
+          <button onclick="viewSavedLog('${escapeHtml(log.id)}','${tool}')">View Summary</button>
+          <button onclick="exportSavedLogPdf('${escapeHtml(log.id)}')">Generate PDF</button>
+          <button class="delete-log" onclick="deleteSavedLog('${escapeHtml(log.id)}')">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+function viewSavedLog(id, tool){
+  const log = recentLogs.find(item=>item.id===id);
+  const target = document.getElementById(tool+'-log-summary');
+  if(!log || !target) return;
+  target.textContent = log.summary || buildLogSummary(log.tool,log.entries,log.savedAt);
+  target.classList.add('show');
+  target.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function deleteSavedLog(id){
+  if(!confirm('Delete this saved log from this device?')) return;
+  recentLogs = recentLogs.filter(item=>item.id!==id);
+  persistRecentLogs();
+  renderSavedLogs();
+}
+
+function pdfAscii(value){
+  return String(value).replace(/[–—]/g,'-').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[^\x20-\x7E\n]/g,'?');
+}
+function wrapPdfText(text,maxLen){
+  const result=[];
+  text.split('\n').forEach(paragraph=>{
+    if(!paragraph){ result.push(''); return; }
+    const words=pdfAscii(paragraph).split(/\s+/); let line='';
+    words.forEach(word=>{
+      const candidate=line ? line+' '+word : word;
+      if(candidate.length>maxLen && line){ result.push(line); line=word; }
+      else line=candidate;
+    });
+    if(line) result.push(line);
+  });
+  return result;
+}
+function makePdfBlob(title,text){
+  const lines=wrapPdfText(title+'\n\n'+text,92);
+  const pages=[];
+  for(let i=0;i<lines.length;i+=48) pages.push(lines.slice(i,i+48));
+  if(!pages.length) pages.push(['No log events.']);
+  const objects=[], pageIds=[], contentIds=[], fontId=3;
+  pages.forEach((_,i)=>{ pageIds.push(4+i*2); contentIds.push(5+i*2); });
+  objects[1]='<< /Type /Catalog /Pages 2 0 R >>';
+  objects[2]='<< /Type /Pages /Kids ['+pageIds.map(id=>id+' 0 R').join(' ')+'] /Count '+pages.length+' >>';
+  objects[fontId]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>';
+  pages.forEach((page,index)=>{
+    const content=page.map((line,lineIndex)=>{
+      const escaped=pdfAscii(line).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
+      return (lineIndex===0?'':'0 -14 Td ')+'('+escaped+') Tj';
+    }).join('\n');
+    objects[pageIds[index]]='<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 '+fontId+' 0 R >> >> /Contents '+contentIds[index]+' 0 R >>';
+    objects[contentIds[index]]='<< /Length '+content.length+' >>\nstream\nBT /F1 10 Tf 48 790 Td 13 TL\n'+content+'\nET\nendstream';
+  });
+  let pdf='%PDF-1.4\n'; const offsets=[0];
+  for(let i=1;i<objects.length;i++){
+    offsets[i]=new TextEncoder().encode(pdf).length;
+    pdf+=i+' 0 obj\n'+objects[i]+'\nendobj\n';
+  }
+  const xrefOffset=new TextEncoder().encode(pdf).length;
+  pdf+='xref\n0 '+objects.length+'\n0000000000 65535 f \n';
+  for(let i=1;i<objects.length;i++) pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+  pdf+='trailer\n<< /Size '+objects.length+' /Root 1 0 R >>\nstartxref\n'+xrefOffset+'\n%%EOF';
+  return new Blob([pdf],{type:'application/pdf'});
+}
+async function downloadLogPdf(tool,entries,savedAt){
+  const title=TOOL_TITLES[tool] || 'Clinical pathway';
+  const summary=buildLogSummary(tool,entries,savedAt);
+  const blob=makePdfBlob(title+' - Log Summary',summary);
+  const date=(savedAt?new Date(savedAt):new Date()).toISOString().slice(0,10);
+  const filename='Stroke-Navigator-'+tool+'-log-'+date+'.pdf';
+  if(typeof File!=='undefined' && navigator.share){
+    const file=new File([blob],filename,{type:'application/pdf'});
+    if(!navigator.canShare || navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({files:[file],title:title+' Log Summary'});
+        return;
+      }catch(e){
+        if(e && e.name==='AbortError') return;
+      }
+    }
+  }
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url; link.download=filename; link.target='_blank';
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+function exportCurrentLogPdf(tool){
+  if(!state[tool].log.length){ alert('There are no events in the current log to export.'); return; }
+  downloadLogPdf(tool,state[tool].log,new Date().toISOString());
+}
+function exportSavedLogPdf(id){
+  const log=recentLogs.find(item=>item.id===id);
+  if(log) downloadLogPdf(log.tool,log.entries,log.savedAt);
 }
 
 function wireLogChecks(){
@@ -1052,6 +1319,7 @@ function wireLogChecks(){
   });
 }
 wireLogChecks();
+ensureLogControls();
 updateBottomNav();
 
 // ============================================================
@@ -2063,6 +2331,7 @@ function clearAllIntervals(tool){
   });
 }
 function performReset(tool){
+  archiveLog(tool,false);
   clearAllIntervals(tool);
   state[tool] = freshState(tool);
 
@@ -2081,7 +2350,6 @@ function performReset(tool){
   if(tool==='isch') resetIschDom();
   if(tool==='haem') resetHaemDom();
 
-  logEvent(tool, '--- Tool reset for new patient ---');
 }
 function resetAssessDom(){
   document.getElementById('hypo-banner').classList.remove('show','stage-alarm');
