@@ -169,6 +169,26 @@ button{font-family:inherit;cursor:pointer;}
 .summary-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px;}
 .summary-table th,.summary-table td{border:1px solid var(--line);padding:6px 5px;text-align:left;vertical-align:top;}
 .summary-table th{background:var(--navy);color:#fff;font-size:11px;}
+.evidence-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:14px 0 10px;}
+.evidence-tab{border:1.5px solid #BFC7D8;background:#F1F3F8;color:var(--navy);border-radius:9px;padding:10px 7px;font-size:12.5px;font-weight:700;}
+.evidence-tab.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+.evidence-audience{display:none;}
+.evidence-audience.show{display:block;}
+.patient-explainer{border:1.5px solid #BFD8D4;background:#F4FBFA;border-radius:12px;padding:13px;margin-bottom:11px;}
+.patient-explainer h4{margin:0 0 6px;color:var(--isch-dark);font-size:15px;}
+.patient-explainer p{font-size:13px;margin:5px 0;}
+.number-card{border:1.5px solid var(--line);border-radius:11px;padding:12px;margin:10px 0;background:#fff;}
+.number-card-title{font-size:13.5px;font-weight:700;color:var(--navy);}
+.number-card-number{font-size:22px;font-weight:800;color:var(--isch-dark);margin:2px 0;}
+.number-card-risk .number-card-number{color:var(--warn);}
+.icon-array{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;max-width:250px;margin:10px 0;}
+.icon-array span{display:block;aspect-ratio:1;border-radius:50%;background:#D8DDE7;border:1px solid #C8CEDA;}
+.icon-array.benefit span.highlight{background:var(--ok);border-color:var(--ok);}
+.icon-array.risk span.highlight{background:var(--warn);border-color:var(--warn);}
+.icon-array.neutral-risk span.highlight{background:var(--amber);border-color:var(--amber);}
+.icon-legend{font-size:11.5px;color:var(--muted);}
+.patient-script{border-left:4px solid var(--isch);background:#EEF7F8;border-radius:0 9px 9px 0;padding:11px 12px;font-size:13px;margin:12px 0;}
+.evidence-caution{background:#FFF7E8;border:1.5px solid #E7C98E;color:#6D4A08;border-radius:10px;padding:10px 11px;font-size:12px;margin-top:10px;}
 
 /* ---------- Bottom Navigation ---------- */
 .bottomnav{position:fixed;bottom:0;left:0;right:0;max-width:640px;margin:0 auto;background:#fff;border-top:1.5px solid var(--line);display:flex;z-index:30;box-shadow:0 -2px 10px rgba(0,0,0,0.08);padding-bottom:env(safe-area-inset-bottom, 0px);padding-left:env(safe-area-inset-left, 0px);padding-right:env(safe-area-inset-right, 0px);}
@@ -585,7 +605,11 @@ button{font-family:inherit;cursor:pointer;}
   <div class="section">
     <button class="counter-btn" style="background:var(--navy)" onclick="toggleEvidencePanel('thrombolysis')" id="thrombolysis-evidence-btn">&#128218; Thrombolysis — Risks, Benefits &amp; Evidence (NNT)</button>
     <div class="hidden-path" id="thrombolysis-evidence-panel">
-
+      <div class="evidence-tabs" role="tablist" aria-label="Thrombolysis risk and benefit information">
+        <button class="evidence-tab active" data-kind="thrombolysis" data-audience="clinician" onclick="setEvidenceAudience('thrombolysis','clinician')">Clinician / Healthcare Professional</button>
+        <button class="evidence-tab" data-kind="thrombolysis" data-audience="patient" onclick="setEvidenceAudience('thrombolysis','patient')">Patient Discussion</button>
+      </div>
+      <div class="evidence-audience show" id="thrombolysis-clinician">
       <div class="refitem" style="margin-top:14px;">
         <div class="refitem-label" style="color:var(--isch)">IV Thrombolysis (Alteplase / Tenecteplase)</div>
         <div class="refitem-box" style="border-color:var(--isch)">
@@ -606,6 +630,36 @@ button{font-family:inherit;cursor:pointer;}
         <tr><td>Excess early deaths (first 7 days)</td><td>NNH ~71; no difference in mortality by 3&ndash;6 months (IST-3)</td></tr>
       </table>
       <div class="textnote" style="margin:8px 0 14px;">Benefit declines and risk stays roughly constant as time passes — this is why door-to-needle speed matters more than almost any other single factor.</div>
+      </div>
+      <div class="evidence-audience" id="thrombolysis-patient">
+        <div class="patient-explainer">
+          <h4>Thrombolysis: a clot-dissolving medicine</h4>
+          <p>The aim is to restore blood flow before more brain tissue is damaged. It improves the chance of less disability, but it cannot guarantee recovery. The benefit is greatest when treatment starts early.</p>
+        </div>
+        <div class="number-card">
+          <div class="number-card-title">If treatment starts within 3 hours</div>
+          <div class="number-card-number">About 10 more in every 100</div>
+          <div style="font-size:12.5px;">have little or no disability at 3–6 months because of treatment (about 33 versus 23 without thrombolysis). NNT ≈10.</div>
+          <div class="icon-array benefit" data-highlight="10" data-label="10 of 100 people gain a favourable outcome"></div>
+          <div class="icon-legend">Green circles represent the additional people benefiting.</div>
+        </div>
+        <div class="number-card">
+          <div class="number-card-title">If treatment starts between 3 and 4.5 hours</div>
+          <div class="number-card-number">About 5 more in every 100</div>
+          <div style="font-size:12.5px;">have little or no disability (about 35 versus 30 without thrombolysis). NNT ≈19.</div>
+          <div class="icon-array benefit" data-highlight="5" data-label="5 of 100 people gain a favourable outcome"></div>
+          <div class="icon-legend">The benefit becomes smaller as time passes.</div>
+        </div>
+        <div class="number-card number-card-risk">
+          <div class="number-card-title">Important additional risk</div>
+          <div class="number-card-number">About 2 extra in every 100</div>
+          <div style="font-size:12.5px;">have a fatal brain haemorrhage within the first 7 days (about 2.7 versus 0.4 without thrombolysis). NNH ≈43.</div>
+          <div class="icon-array risk" data-highlight="2" data-label="About 2 additional fatal brain haemorrhages per 100 people"></div>
+          <div class="icon-legend">Red circles represent the approximate additional risk.</div>
+        </div>
+        <div class="patient-script"><b>Possible wording:</b> “This medicine can improve the chance of a better recovery, especially because we can give it early. For every 100 similar people treated within three hours, around 10 more have little or no disability. Around 2 extra may have a fatal brain bleed. Your individual balance depends on the scan, stroke severity, medical history and treatment time.”</div>
+        <div class="evidence-caution"><b>Use carefully:</b> These are pooled alteplase trial averages, not an individual prediction. Definitions and estimates vary, and tenecteplase-specific estimates may differ. Use the approved local consent process and do not delay time-critical treatment unnecessarily.</div>
+      </div>
     </div>
   </div>
 
@@ -619,6 +673,11 @@ button{font-family:inherit;cursor:pointer;}
   <div class="section">
     <button class="counter-btn" style="background:var(--navy)" onclick="toggleEvidencePanel('thrombectomy')" id="thrombectomy-evidence-btn">&#128218; Thrombectomy — Risks, Benefits &amp; Evidence (NNT)</button>
     <div class="hidden-path" id="thrombectomy-evidence-panel">
+      <div class="evidence-tabs" role="tablist" aria-label="Thrombectomy risk and benefit information">
+        <button class="evidence-tab active" data-kind="thrombectomy" data-audience="clinician" onclick="setEvidenceAudience('thrombectomy','clinician')">Clinician / Healthcare Professional</button>
+        <button class="evidence-tab" data-kind="thrombectomy" data-audience="patient" onclick="setEvidenceAudience('thrombectomy','patient')">Patient Discussion</button>
+      </div>
+      <div class="evidence-audience show" id="thrombectomy-clinician">
       <div class="refitem">
         <div class="refitem-label" style="color:var(--isch)">Mechanical Thrombectomy</div>
         <div class="refitem-box" style="border-color:var(--isch)">
@@ -642,6 +701,40 @@ button{font-family:inherit;cursor:pointer;}
         <tr><td>Access-site complications</td><td>~2%</td></tr>
       </table>
       <div class="textnote" style="margin:8px 0 0;">These are trial-derived population estimates, not individual predictions. Actual risk/benefit varies with age, comorbidities, baseline NIHSS, ASPECTS, and time to treatment — use to inform, not replace, shared decision-making and consent discussion.</div>
+      </div>
+      <div class="evidence-audience" id="thrombectomy-patient">
+        <div class="patient-explainer">
+          <h4>Thrombectomy: removing a clot through an artery</h4>
+          <p>A specialist passes a thin tube, usually through an artery in the groin or wrist, and removes the clot from a large brain artery. The aim is to restore blood flow and reduce disability.</p>
+        </div>
+        <div class="number-card">
+          <div class="number-card-title">A meaningful improvement in disability</div>
+          <div class="number-card-number">About 38 more in every 100</div>
+          <div style="font-size:12.5px;">have at least one better level on the disability scale because of thrombectomy. NNT ≈2.6.</div>
+          <div class="icon-array benefit" data-highlight="38" data-label="38 of 100 people gain at least one disability level"></div>
+          <div class="icon-legend">Green circles represent additional people with a better disability outcome.</div>
+        </div>
+        <div class="number-card">
+          <div class="number-card-title">Living independently at 90 days</div>
+          <div class="number-card-number">About 20 more in every 100</div>
+          <div style="font-size:12.5px;">are functionally independent (about 46 versus 27 without thrombectomy). NNT ≈5.</div>
+          <div class="icon-array benefit" data-highlight="20" data-label="20 of 100 people gain functional independence"></div>
+          <div class="icon-legend">The benefit is generally greater when blood flow is restored sooner.</div>
+        </div>
+        <div class="number-card">
+          <div class="number-card-title">Symptomatic brain haemorrhage in the standard-window trials</div>
+          <div class="number-card-number">About 4 in every 100 in both groups</div>
+          <div style="font-size:12.5px;">HERMES found no significant increase with thrombectomy (4.4 versus 4.3 without thrombectomy).</div>
+          <div class="icon-array neutral-risk" data-highlight="4" data-label="About 4 of 100 people in either group had symptomatic brain haemorrhage"></div>
+          <div class="icon-legend">Amber circles show the background event rate in both comparison groups—not extra risk caused by thrombectomy.</div>
+        </div>
+        <div class="patient-explainer">
+          <h4>Other procedure risks</h4>
+          <p>These include damage or perforation of an artery, movement of clot into another artery, bleeding where the tube enters, contrast reaction and anaesthetic complications. Exact risks depend on anatomy, health, imaging and the treating centre.</p>
+        </div>
+        <div class="patient-script"><b>Possible wording:</b> “The scan shows a large artery blocked by a clot. Removing it offers a substantial chance of reducing disability. In trials of similar selected patients, about 20 more in every 100 were independent at three months, and about 38 more had some improvement in disability. The procedure also has risks, including bleeding or artery damage, and the individual balance depends on the scan, time and overall health.”</div>
+        <div class="evidence-caution"><b>Use carefully:</b> The diagrams use the early-window HERMES trial population. Benefits and risks may differ for posterior circulation, large-core or 6–24-hour imaging-selected patients. Use local thrombectomy-centre information and specialist consent procedures.</div>
+      </div>
     </div>
   </div>
 
@@ -1654,6 +1747,34 @@ function toggleEvidencePanel(kind){
   btn.textContent = (showing ? '\u25B2 Hide ' : '\u{1F4D8} ') + label + ' — Risks, Benefits & Evidence (NNT)';
   if(showing) logEvent('isch','Viewed risks/benefits/evidence summary for '+kind);
 }
+function setEvidenceAudience(kind,audience){
+  document.querySelectorAll('.evidence-tab[data-kind="'+kind+'"]').forEach(btn=>{
+    const active = btn.dataset.audience===audience;
+    btn.classList.toggle('active',active);
+    btn.setAttribute('aria-selected',active ? 'true' : 'false');
+  });
+  ['clinician','patient'].forEach(view=>{
+    const panel=document.getElementById(kind+'-'+view);
+    if(panel) panel.classList.toggle('show',view===audience);
+  });
+}
+function renderEvidenceIcons(){
+  document.querySelectorAll('.icon-array').forEach(array=>{
+    const highlighted=Math.max(0,Math.min(100,Number(array.dataset.highlight)||0));
+    const fragment=document.createDocumentFragment();
+    for(let i=0;i<100;i++){
+      const dot=document.createElement('span');
+      if(i<highlighted) dot.className='highlight';
+      dot.setAttribute('aria-hidden','true');
+      fragment.appendChild(dot);
+    }
+    array.innerHTML='';
+    array.setAttribute('role','img');
+    array.setAttribute('aria-label',array.dataset.label||highlighted+' of 100 people');
+    array.appendChild(fragment);
+  });
+}
+renderEvidenceIcons();
 const thrombectomyNotes = {
   a: 'Confirmed proximal occlusion (ICA/MCA M1) on CTA; offer alongside IV thrombolysis if not contraindicated.',
   b: 'Based on ASPECTS score and CT-perfusion / clinical-imaging mismatch showing salvageable tissue.',
@@ -2451,6 +2572,8 @@ function resetIschDom(){
   document.getElementById('thrombolysis-evidence-btn').textContent = '\u{1F4D8} Thrombolysis — Risks, Benefits & Evidence (NNT)';
   document.getElementById('thrombectomy-evidence-panel').classList.remove('show');
   document.getElementById('thrombectomy-evidence-btn').textContent = '\u{1F4D8} Thrombectomy — Risks, Benefits & Evidence (NNT)';
+  setEvidenceAudience('thrombolysis','clinician');
+  setEvidenceAudience('thrombectomy','clinician');
   document.getElementById('thrombectomy-count').textContent = 'Not performed';
   document.getElementById('thrombectomy-btn').disabled = false;
   document.getElementById('thrombectomy-note').textContent = 'Select a presentation to see the matching criteria.';
